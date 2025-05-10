@@ -1,5 +1,5 @@
 import { Change, diffWords } from "diff";
-import { Editor, Notice, getFrontMatterInfo } from "obsidian";
+import { Editor, Notice, getFrontMatterInfo, Platform, EditorPosition } from "obsidian";
 import Proofreader from "./main";
 import { openAiRequest } from "./openai-request";
 import { lmStudioRequest } from "./lmstudio-request";
@@ -53,8 +53,10 @@ function getDiffMarkdown(
 
 async function validateAndGetChangesAndNotify(
 	plugin: Proofreader,
+	editor: Editor,
 	oldText: string,
 	scope: string,
+	originalRange?: { from: EditorPosition; to: EditorPosition }
 ): Promise<string | undefined> {
 	const { app, settings } = plugin;
 
@@ -129,13 +131,80 @@ async function validateAndGetChangesAndNotify(
 	// notify on changes
 	const pluralS = changeCount === 1 ? "" : "s";
 	const costString = settings.llmProvider === "openai" && cost ? `est. cost: $${cost.toFixed(4)}` : "";
-	const msg2 = [
-		`🤖 ${changeCount} change${pluralS} made.`,
-		costString,
-	].filter(Boolean).join("\n\n");
-	new Notice(msg2, notifDuration);
+
+	const noticeMessage = document.createDocumentFragment();
+	noticeMessage.appendText(`🤖 ${changeCount} change${pluralS} made.`);
+	if (costString) {
+		noticeMessage.appendChild(document.createElement("br"));
+		noticeMessage.appendChild(document.createElement("br"));
+		noticeMessage.appendText(costString);
+	}
+
+	const noticeWithActions = new Notice(noticeMessage, 0);
+
+	// Create action buttons if running in a desktop environment and originalRange is defined
+	if (!Platform.isMobile && originalRange) {
+		const suggestionStartPos = originalRange.from;
+
+		// Calculate end position based on textWithSuggestions content and its start position
+		let currentLineNum = suggestionStartPos.line;
+		let currentCharPos = suggestionStartPos.ch;
+		const linesInSuggestion = textWithSuggestions ? textWithSuggestions.split("\n") : [""];
+
+		if (linesInSuggestion.length === 1) {
+			currentCharPos = suggestionStartPos.ch + linesInSuggestion[0].length; 
+		} else {
+			currentLineNum = suggestionStartPos.line + linesInSuggestion.length - 1;
+			// For the last line, ch is its length. If it started at ch 0 of that new line.
+			// However, the original diff logic places it relative to the start of the *first* line of the suggestion.
+			// The most robust way is to use offsets IF the initial text insertion is also done via offsets or if we can precisely get the range of that insertion.
+			// Given the current replaceRange/setLine for initial insertion, let's stick to a simpler line/char calculation for now.
+			// This part can be tricky if the original selection wasn't from ch: 0.
+			// For simplicity, if multi-line, the char pos of the last line of suggestion is its length.
+			currentCharPos = linesInSuggestion[linesInSuggestion.length - 1].length;
+		}
+		const actualSuggestionEndPos: EditorPosition = { line: currentLineNum, ch: currentCharPos };
+
+		// DEBUGGING LOGS
+		console.log("[Proofreader] Debug Info for Accept/Reject:");
+		console.log("Original Text (oldText):", JSON.stringify(oldText));
+		console.log("AI Output (newText from result):", JSON.stringify(result?.newText)); // Log the raw AI output
+		console.log("Text with Suggestions (textWithSuggestions):", JSON.stringify(textWithSuggestions));
+		console.log("Original Range From:", originalRange.from, "To:", originalRange.to);
+		console.log("Calculated Suggestion End Position (actualSuggestionEndPos):", actualSuggestionEndPos);
+
+		const actionsEl = noticeWithActions.noticeEl.createDiv({ cls: "proofreader-actions" });
+		actionsEl.style.marginTop = "10px";
+
+		const acceptBtn = actionsEl.createEl("button", { text: "Accept All" });
+		acceptBtn.style.marginRight = "10px";
+		acceptBtn.addEventListener("click", () => {
+			const acceptedText = removeMarkup(textWithSuggestions, "accept");
+			console.log("[Proofreader] Accepting - Accepted Text:", JSON.stringify(acceptedText));
+			console.log("[Proofreader] Accepting - Replacing Range From:", suggestionStartPos, "To:", actualSuggestionEndPos);
+			editor.replaceRange(acceptedText, suggestionStartPos, actualSuggestionEndPos);
+			noticeWithActions.hide();
+			new Notice("✅ Suggestions accepted.");
+		});
+
+		const rejectBtn = actionsEl.createEl("button", { text: "Reject All" });
+		rejectBtn.addEventListener("click", () => {
+			console.log("[Proofreader] Rejecting - Original Text:", JSON.stringify(oldText));
+			console.log("[Proofreader] Rejecting - Replacing Range From:", suggestionStartPos, "To:", actualSuggestionEndPos);
+			editor.replaceRange(oldText, suggestionStartPos, actualSuggestionEndPos);
+			noticeWithActions.hide();
+			new Notice("❌ Suggestions rejected.");
+		});
+	}
 
 	return textWithSuggestions;
+}
+
+// Helper function (might need to be moved or imported from accept-reject-suggestions.ts if we refactor)
+function removeMarkup(text: string, mode: "accept" | "reject"): string {
+	return mode === "accept"
+		? text.replace(/==/g, "").replace(/~~.*?~~/g, "")
+		: text.replace(/~~/g, "").replace(/==.*?==/g, "");
 }
 
 //──────────────────────────────────────────────────────────────────────────────
@@ -146,13 +215,16 @@ export async function proofreadDocument(plugin: Proofreader, editor: Editor): Pr
 	const bodyEnd = noteWithFrontmatter.length;
 	const oldText = noteWithFrontmatter.slice(bodyStart);
 
-	const changes = await validateAndGetChangesAndNotify(plugin, oldText, "Document");
-	if (!changes) return;
-
+	// Define the range for the entire document body for accept/reject actions
 	const bodyStartPos = editor.offsetToPos(bodyStart);
 	const bodyEndPos = editor.offsetToPos(bodyEnd);
-	editor.replaceRange(changes, bodyStartPos, bodyEndPos);
-	editor.setCursor(bodyStartPos); // to start of doc
+	const docRange = { from: bodyStartPos, to: bodyEndPos };
+
+	const changes = await validateAndGetChangesAndNotify(plugin, editor, oldText, "Document", docRange);
+	if (!changes) return;
+
+	editor.replaceRange(changes, docRange.from, docRange.to);
+	editor.setCursor(docRange.from); // to start of doc body
 }
 
 export async function proofreadText(plugin: Proofreader, editor: Editor): Promise<void> {
@@ -167,14 +239,23 @@ export async function proofreadText(plugin: Proofreader, editor: Editor): Promis
 	const oldText = selection || editor.getLine(cursor.line);
 	const scope = selection ? "Selection" : "Paragraph";
 
-	const changes = await validateAndGetChangesAndNotify(plugin, oldText, scope);
+	let originalRange: { from: EditorPosition; to: EditorPosition };
+	if (selection) {
+		originalRange = { from: editor.getCursor("from"), to: editor.getCursor("to") };
+	} else {
+		const lineStart = { line: cursor.line, ch: 0 };
+		const lineEnd = { line: cursor.line, ch: editor.getLine(cursor.line).length };
+		originalRange = { from: lineStart, to: lineEnd };
+	}
+
+	const changes = await validateAndGetChangesAndNotify(plugin, editor, oldText, scope, originalRange);
 	if (!changes) return;
 
 	if (selection) {
 		editor.replaceSelection(changes);
-		editor.setCursor(cursor); // to start of selection
+		editor.setCursor(originalRange.from); 
 	} else {
 		editor.setLine(cursor.line, changes);
-		editor.setCursor({ line: cursor.line, ch: 0 }); // to start of paragraph
+		editor.setCursor({ line: cursor.line, ch: 0 }); 
 	}
 }
