@@ -39,4 +39,4 @@ if (result.metafile) {
 
 // FIX prevent Obsidian from removing the source map when using dev build
 // https://forum.obsidian.md/t/source-map-trimming-in-dev-builds/87612
-if (!production) appendFileSync(import.meta.dirname + "/main.js", "\n/* nosourcemap */");
+if (!production) appendFileSync(process.cwd() + "/main.js", "\n/* nosourcemap */");
