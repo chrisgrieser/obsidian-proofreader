@@ -164,23 +164,37 @@ function removeMarkup(text: string, mode: "accept" | "reject"): string {
 function showSuggestionMenu(
 	plugin: Proofreader,
 	editor: Editor,
-	textWithSuggestions: string,
-	oldText: string,
-	suggestionStartPos: EditorPosition,
-	suggestionEndPos: EditorPosition,
-	scope: string
+	currentScopeTextWithMarkup: string, // Current text of the scope in the editor, with markup
+	originalUntouchedText: string,    // Original text of the scope before any proofreading
+	scopeStartPos: EditorPosition,      // Fixed start of the scope in the editor
+	scopeEndPos: EditorPosition,        // Fixed end of the scope in the editor (after initial suggestions were applied)
+	scopeType: string // "Document", "Selection", or "Paragraph"
 ) {
-	if (Platform.isMobile) return; // No menu on mobile for now
+	if (Platform.isMobile) return; 
 
 	const menu = new Menu();
+
+	// Helper to re-evaluate and show menu or notice
+	const reEvaluateAndShowMenu = () => {
+		const updatedScopeText = editor.getRange(scopeStartPos, scopeEndPos);
+		if (/==|~~/.test(updatedScopeText)) {
+			// Ensure the menu appears near the original spot, not where the mouse just clicked the previous menu
+			const coords = editor.cm.coordsAtPos(editor.posToOffset(scopeStartPos));
+			const position = coords ? { x: coords.left, y: coords.bottom + 5 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+			// Timeout to allow editor to update and menu to close before showing new one
+			setTimeout(() => showSuggestionMenu(plugin, editor, updatedScopeText, originalUntouchedText, scopeStartPos, scopeEndPos, scopeType), 50);
+		} else {
+			new Notice("✅ All suggestions handled in this block.");
+		}
+	};
 
 	menu.addItem((item: MenuItem) => {
 		item.setTitle("Accept All Suggestions")
 			.setIcon("check-check")
 			.onClick(() => {
-				const acceptedText = removeMarkup(textWithSuggestions, "accept");
-				editor.replaceRange(acceptedText, suggestionStartPos, suggestionEndPos);
-				new Notice("✅ Suggestions accepted.");
+				const acceptedText = removeMarkup(currentScopeTextWithMarkup, "accept");
+				editor.replaceRange(acceptedText, scopeStartPos, scopeEndPos);
+				new Notice("✅ All suggestions accepted.");
 			});
 	});
 
@@ -188,40 +202,35 @@ function showSuggestionMenu(
 		item.setTitle("Reject All Suggestions")
 			.setIcon("x")
 			.onClick(() => {
-				editor.replaceRange(oldText, suggestionStartPos, suggestionEndPos);
-				new Notice("❌ Suggestions rejected.");
+				editor.replaceRange(originalUntouchedText, scopeStartPos, scopeEndPos);
+				new Notice("❌ All suggestions rejected.");
 			});
 	});
 
 	menu.addSeparator();
 
-	// TODO: Add "Accept Next" and "Reject Next" items and logic for iterative application
-	// For now, placeholder for Accept Next
 	menu.addItem((item: MenuItem) => {
-		item.setTitle("Accept Next Suggestion (WIP)")
-			.setIcon("chevrons-right")
+		item.setTitle("Accept Next Suggestion")
+			.setIcon("chevron-right") 
 			.onClick(() => {
-				// Placeholder: Call acceptOrRejectNextSuggestion(editor, "accept");
-				// Need to handle menu persistence/re-showing
-				new Notice("Accept Next - WIP");
+				acceptOrRejectNextSuggestion(editor, "accept");
+				reEvaluateAndShowMenu();
 			});
 	});
 
-	// Placeholder for Reject Next
 	menu.addItem((item: MenuItem) => {
-		item.setTitle("Reject Next Suggestion (WIP)")
-			.setIcon("chevrons-right") // Could use a different icon for reject next
+		item.setTitle("Reject Next Suggestion")
+			.setIcon("chevron-left") // Changed icon for visual difference
 			.onClick(() => {
-				new Notice("Reject Next - WIP");
+				acceptOrRejectNextSuggestion(editor, "reject");
+				reEvaluateAndShowMenu();
 			});
 	});
 
-	// Position the menu near the start of the suggestions
-	const coords = editor.cm.coordsAtPos(editor.posToOffset(suggestionStartPos));
+	const coords = editor.cm.coordsAtPos(editor.posToOffset(scopeStartPos));
 	if (coords) {
-		menu.showAtPosition({ x: coords.left, y: coords.bottom + 5 }); // Show slightly below the start
+		menu.showAtPosition({ x: coords.left, y: coords.bottom + 5 });
 	} else {
-		// Fallback if coordinates can't be determined
 		menu.showAtPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 	}
 }
@@ -231,31 +240,31 @@ function showSuggestionMenu(
 export async function proofreadDocument(plugin: Proofreader, editor: Editor): Promise<void> {
 	const noteWithFrontmatter = editor.getValue();
 	const bodyStartOffset = getFrontMatterInfo(noteWithFrontmatter).contentStart || 0;
-	const oldText = noteWithFrontmatter.slice(bodyStartOffset);
+	const originalDocBodyText = noteWithFrontmatter.slice(bodyStartOffset);
 
-	const bodyInitialStartPos = editor.offsetToPos(bodyStartOffset);
-	const bodyInitialEndPos = editor.offsetToPos(noteWithFrontmatter.length);
-	const docOriginalRange = { from: bodyInitialStartPos, to: bodyInitialEndPos };
+	const initialScopeStartPos = editor.offsetToPos(bodyStartOffset);
+	// Use the end of the original document body for the initial replacement range
+	const initialScopeEndPos = editor.offsetToPos(bodyStartOffset + originalDocBodyText.length);
+	const docOriginalRange = { from: initialScopeStartPos, to: initialScopeEndPos };
 
-	const result = await generateSuggestions(plugin, editor, oldText, "Document", docOriginalRange);
+	const result = await generateSuggestions(plugin, editor, originalDocBodyText, "Document", docOriginalRange);
 	if (!result || !result.textWithSuggestions) return;
 
 	// Apply the suggestions to the editor first
 	editor.replaceRange(result.textWithSuggestions, docOriginalRange.from, docOriginalRange.to);
 	editor.setCursor(docOriginalRange.from); 
 
-	// Now calculate the actual end position of the inserted suggestions
-	const actualSuggestionEndOffset = bodyStartOffset + result.textWithSuggestions.length;
-	const actualSuggestionEndPos = editor.offsetToPos(actualSuggestionEndOffset);
+	// The new end position of the block containing suggestions
+	const actualSuggestionBlockEndOffset = bodyStartOffset + result.textWithSuggestions.length;
+	const actualSuggestionBlockEndPos = editor.offsetToPos(actualSuggestionBlockEndOffset);
 
-	// Show the menu
 	showSuggestionMenu(
 		plugin,
 		editor,
-		result.textWithSuggestions,
-		result.oldText,
-		docOriginalRange.from,
-		actualSuggestionEndPos,
+		result.textWithSuggestions, // This is the text now in the editor
+		originalDocBodyText,        // Original pre-suggestion text for this scope
+		docOriginalRange.from,      // Start of the scope
+		actualSuggestionBlockEndPos, // End of the current suggestion block in editor
 		"Document"
 	);
 }
@@ -269,25 +278,25 @@ export async function proofreadText(plugin: Proofreader, editor: Editor): Promis
 
 	const cursor = editor.getCursor("from");
 	const selection = editor.getSelection();
-	const oldText = selection || editor.getLine(cursor.line);
-	const scope = selection ? "Selection" : "Paragraph";
+	const originalScopedText = selection || editor.getLine(cursor.line);
+	const scopeType = selection ? "Selection" : "Paragraph";
 
-	let textInitialStartPos: EditorPosition;
-	let textInitialEndPos: EditorPosition;
-	let originalContentOffsetStart: number;
+	let initialScopeStartPos: EditorPosition;
+	let initialScopeEndPos: EditorPosition;
+	let originalContentOffsetStart: number; // To calculate end pos after inserting suggestions
 
 	if (selection) {
-		textInitialStartPos = editor.getCursor("from");
-		textInitialEndPos = editor.getCursor("to");
-		originalContentOffsetStart = editor.posToOffset(textInitialStartPos);
-	} else {
-		textInitialStartPos = { line: cursor.line, ch: 0 };
-		textInitialEndPos = { line: cursor.line, ch: editor.getLine(cursor.line).length };
-		originalContentOffsetStart = editor.posToOffset(textInitialStartPos);
+		initialScopeStartPos = editor.getCursor("from");
+		initialScopeEndPos = editor.getCursor("to");
+		originalContentOffsetStart = editor.posToOffset(initialScopeStartPos);
+	} else { // Paragraph
+		initialScopeStartPos = { line: cursor.line, ch: 0 };
+		initialScopeEndPos = { line: cursor.line, ch: originalScopedText.length };
+		originalContentOffsetStart = editor.posToOffset(initialScopeStartPos);
 	}
-	const textOriginalRange = { from: textInitialStartPos, to: textInitialEndPos };
+	const textOriginalRange = { from: initialScopeStartPos, to: initialScopeEndPos };
 
-	const result = await generateSuggestions(plugin, editor, oldText, scope, textOriginalRange);
+	const result = await generateSuggestions(plugin, editor, originalScopedText, scopeType, textOriginalRange);
 	if (!result || !result.textWithSuggestions) return;
 
 	// Apply the suggestions to the editor first
@@ -298,18 +307,17 @@ export async function proofreadText(plugin: Proofreader, editor: Editor): Promis
 	}
 	editor.setCursor(textOriginalRange.from);
 
-	// Now calculate the actual end position of the inserted suggestions
-	const actualSuggestionEndOffset = originalContentOffsetStart + result.textWithSuggestions.length;
-	const actualSuggestionEndPos = editor.offsetToPos(actualSuggestionEndOffset);
+	// The new end position of the block containing suggestions
+	const actualSuggestionBlockEndOffset = originalContentOffsetStart + result.textWithSuggestions.length;
+	const actualSuggestionBlockEndPos = editor.offsetToPos(actualSuggestionBlockEndOffset);
 
-	// Show the menu
 	showSuggestionMenu(
 		plugin,
 		editor,
-		result.textWithSuggestions,
-		result.oldText,
-		textOriginalRange.from,
-		actualSuggestionEndPos,
-		scope
+		result.textWithSuggestions, // This is the text now in the editor
+		originalScopedText,         // Original pre-suggestion text for this scope
+		textOriginalRange.from,     // Start of the scope
+		actualSuggestionBlockEndPos,  // End of the current suggestion block in editor
+		scopeType
 	);
 }
