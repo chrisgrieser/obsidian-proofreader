@@ -55,6 +55,20 @@ export default class Proofreader extends Plugin {
 			icon: "x",
 		});
 
+		// Add context menu item for editor
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu, editor) => {
+				menu.addItem((item) => {
+					item
+						.setTitle("Proofread selection/paragraph")
+						.setIcon("bot-message-square")
+						.onClick(async () => {
+							await proofreadText(this, editor);
+						});
+				});
+			})
+		);
+
 		console.info(this.manifest.name + " Plugin loaded.");
 	}
 
