@@ -2,6 +2,7 @@ import { Change, diffWords } from "diff";
 import { Editor, Notice, getFrontMatterInfo } from "obsidian";
 import Proofreader from "./main";
 import { openAiRequest } from "./openai-request";
+import { lmStudioRequest } from "./lmstudio-request";
 import { ProofreaderSettings } from "./settings";
 
 // DOCS https://github.com/kpdecker/jsdiff#readme
@@ -34,8 +35,8 @@ function getDiffMarkdown(
 
 	// cleanup
 	textWithSuggestions = textWithSuggestions
-		.replace(/~~"~~==[“”]==/g, '"') // preserve non-smart quotes
-		.replace(/~~'~~==[‘’]==/g, "'")
+		.replace(/~~"~~==[""]==/g, '"') // preserve non-smart quotes
+		.replace(/~~'~~==['']==/g, "'")
 		.replace(/(==|~~) /g, " $1") // prevent leading spaces in markup, as they make it invalid
 		.replace(/~~(.+?)(.)~~==(\1)==/g, "$1~~$2~~") // only removal of one char, e.g. plural-s
 		.replace(/~~(.+?)~~==(?:\1)(.)==/g, "$1==$2=="); // only addition of one char
@@ -89,9 +90,23 @@ async function validateAndGetChangesAndNotify(
 	const notice = new Notice(msg, 0);
 
 	// perform request, check that file is still the same
-	const { newText, isOverlength, cost } = (await openAiRequest(settings, oldText)) || {};
+	let requestPromise;
+	if (settings.llmProvider === "openai") {
+		requestPromise = openAiRequest(settings, oldText);
+	} else if (settings.llmProvider === "lmstudio") {
+		requestPromise = lmStudioRequest(settings, oldText);
+	} else {
+		new Notice(`Unknown LLM provider: ${settings.llmProvider}`);
+		notice.hide();
+		return;
+	}
+
+	const result = await requestPromise;
 	notice.hide();
-	if (!newText) return;
+	if (!result || !result.newText) return;
+
+	const { newText, isOverlength, cost } = result;
+
 	const fileAfter = app.workspace.getActiveFile()?.path;
 	if (fileBefore !== fileAfter) {
 		const errmsg = "⚠️ The active file changed since the proofread has been triggered. Aborting.";
@@ -113,11 +128,11 @@ async function validateAndGetChangesAndNotify(
 
 	// notify on changes
 	const pluralS = changeCount === 1 ? "" : "s";
+	const costString = settings.llmProvider === "openai" && cost ? `est. cost: $${cost.toFixed(4)}` : "";
 	const msg2 = [
 		`🤖 ${changeCount} change${pluralS} made.`,
-		"",
-		`est. cost: $${cost?.toFixed(4)}`,
-	].join("\n");
+		costString,
+	].filter(Boolean).join("\n\n");
 	new Notice(msg2, notifDuration);
 
 	return textWithSuggestions;

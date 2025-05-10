@@ -1,4 +1,4 @@
-import { PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, requestUrl, DropdownComponent, TextComponent, TextAreaComponent, ButtonComponent } from "obsidian";
 import Proofreader from "./main";
 
 // The `nano` and `mini` models are sufficiently good sufficiently good output
@@ -41,6 +41,9 @@ type OpenAiModels = keyof typeof MODEL_SPECS;
 //──────────────────────────────────────────────────────────────────────────────
 
 export const DEFAULT_SETTINGS = {
+	llmProvider: "openai" as "openai" | "lmstudio",
+	lmStudioServerUrl: "http://localhost:1234",
+	lmStudioReasoningEnabled: false,
 	openAiApiKey: "",
 	openAiModel: "gpt-4.1-nano" as OpenAiModels,
 	staticPrompt:
@@ -67,38 +70,133 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl).setName("OpenAI API key").addText((input) => {
-			input.inputEl.type = "password"; // obfuscates the field
-			input.inputEl.setCssProps({ width: "100%" });
-			input
-				.setPlaceholder("sk-123456789…")
-				.setValue(settings.openAiApiKey)
-				.onChange(async (value) => {
-					settings.openAiApiKey = value.trim();
-					await this.plugin.saveSettings();
-				});
-		});
-
+		// LLM Provider Setting
 		new Setting(containerEl)
-			.setName("Model")
-			.setDesc(
-				"The nano model is slightly quicker and cheaper. " +
-					"The mini model is slightly higher quality, but also more expensive. " +
-					"Other models are both slower and more expensive; they should only be selected " +
-					"by advanced users who customize the prompt and intend to use this plugin for " +
-					"tasks beyond proofreading.",
-			)
-			.addDropdown((dropdown) => {
-				for (const key in MODEL_SPECS) {
-					if (!Object.hasOwn(MODEL_SPECS, key)) continue;
-					const display = MODEL_SPECS[key as OpenAiModels].displayText;
-					dropdown.addOption(key, display);
+			.setName("LLM Provider")
+			.setDesc("Select the LLM provider to use.")
+			.addDropdown((dropdown: DropdownComponent) => {
+				dropdown
+					.addOption("openai", "OpenAI")
+					.addOption("lmstudio", "LM Studio")
+					.setValue(settings.llmProvider)
+					.onChange(async (value: string) => {
+						settings.llmProvider = value as "openai" | "lmstudio";
+						await this.plugin.saveSettings();
+						this.display(); // Re-render the settings page
+					});
+			});
+
+		if (settings.llmProvider === "openai") {
+			// OpenAI Specific Settings
+			new Setting(containerEl).setName("OpenAI API key").addText((input: TextComponent) => {
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("sk-123456789...")
+					.setValue(settings.openAiApiKey)
+					.onChange(async (value: string) => {
+						settings.openAiApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+			new Setting(containerEl)
+				.setName("Model")
+				.setDesc(
+					"The nano model is slightly quicker and cheaper. " +
+						"The mini model is slightly higher quality, but also more expensive. " +
+						"Other models are both slower and more expensive; they should only be selected " +
+						"by advanced users who customize the prompt and intend to use this plugin for " +
+						"tasks beyond proofreading.",
+				)
+				.addDropdown((dropdown: DropdownComponent) => {
+					for (const key in MODEL_SPECS) {
+						if (!Object.hasOwn(MODEL_SPECS, key)) continue;
+						const display = MODEL_SPECS[key as OpenAiModels].displayText;
+						dropdown.addOption(key, display);
+					}
+					dropdown.setValue(settings.openAiModel).onChange(async (value: string) => {
+						settings.openAiModel = value as OpenAiModels;
+						await this.plugin.saveSettings();
+					});
+				});
+		} else if (settings.llmProvider === "lmstudio") {
+			// LM Studio Specific Settings
+			new Setting(containerEl)
+				.setName("LM Studio Server URL")
+				.setDesc("Enter the URL of your LM Studio server (e.g., http://localhost:1234).")
+				.addText((text: TextComponent) =>
+					text
+						.setPlaceholder("http://localhost:1234")
+						.setValue(settings.lmStudioServerUrl)
+						.onChange(async (value: string) => {
+							settings.lmStudioServerUrl = value.trim();
+							await this.plugin.saveSettings();
+							this.display(); // Re-render to update model list
+						}),
+				);
+
+			const modelSetting = new Setting(containerEl)
+				.setName("Model")
+				.setDesc("Select a model from your LM Studio server. Ensure the server is running and accessible.");
+			
+			// Add a button to refresh the model list
+			modelSetting.addButton((button: ButtonComponent) => {
+				button
+					.setButtonText("Refresh Models")
+					.setCta()
+					.onClick(async () => {
+						this.display(); // Re-render to fetch and display models
+					});
+			});
+
+
+			modelSetting.addDropdown(async (dropdown: DropdownComponent) => {
+				try {
+					const response = await requestUrl({ url: `${settings.lmStudioServerUrl}/v1/models` });
+					if (response.status !== 200) {
+						throw new Error(`Failed to fetch models: ${response.status}`);
+					}
+					const data = response.json;
+					const models = data.data || [];
+
+					if (models.length === 0) {
+						dropdown.addOption("", "No models found or server offline");
+						dropdown.setDisabled(true);
+					} else {
+						models.forEach((model: { id: string }) => {
+							dropdown.addOption(model.id, model.id);
+						});
+						// Ensure openAiModel (which we'll reuse for lmstudio model) is set to a valid model if not already
+						if (!models.some((m: {id: string}) => m.id === settings.openAiModel) && models.length > 0) {
+							settings.openAiModel = models[0].id as OpenAiModels;
+							await this.plugin.saveSettings();
+						}
+					}
+				} catch (error) {
+					console.error("Error fetching LM Studio models:", error);
+					dropdown.addOption("", "Error fetching models. Check server URL and console.");
+					dropdown.setDisabled(true);
 				}
-				dropdown.setValue(settings.openAiModel).onChange(async (value) => {
+				dropdown.setValue(settings.openAiModel).onChange(async (value: string) => {
 					settings.openAiModel = value as OpenAiModels;
 					await this.plugin.saveSettings();
 				});
 			});
+
+			// New Setting for LM Studio Reasoning Mode
+			new Setting(containerEl)
+				.setName("Reasoning Mode")
+				.setDesc("Enable if your LM Studio model uses <think>...</think> tags for reasoning and you want to discard this part.")
+				.addToggle((toggle: import("obsidian").ToggleComponent) =>  // Added explicit type
+					toggle
+						.setValue(settings.lmStudioReasoningEnabled)
+						.onChange(async (value: boolean) => {
+							settings.lmStudioReasoningEnabled = value;
+							await this.plugin.saveSettings();
+						}),
+				);
+		}
 
 		//────────────────────────────────────────────────────────────────────────
 		// CLEANUP OPTIONS
@@ -123,11 +221,11 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					"Most users do not need to change this setting. " +
 					"Only change this if you know what you are doing.",
 			)
-			.addTextArea((textarea) => {
+			.addTextArea((textarea: TextAreaComponent) => {
 				textarea.inputEl.setCssProps({ width: "25vw", height: "15em" });
 				textarea
 					.setValue(settings.staticPrompt)
-					.setPlaceholder("Make suggestions based on…")
+					.setPlaceholder("Make suggestions based on...")
 					.onChange(async (value) => {
 						if (value.trim() === "") return;
 						settings.staticPrompt = value.trim();
