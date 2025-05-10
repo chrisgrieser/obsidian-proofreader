@@ -3,6 +3,7 @@ import { Editor, Notice, getFrontMatterInfo, Platform, EditorPosition, Menu, Men
 import Proofreader from "./main";
 import { openAiRequest } from "./openai-request";
 import { lmStudioRequest } from "./lmstudio-request";
+import { geminiRequest } from "./gemini-request";
 import { ProofreaderSettings } from "./settings";
 import { acceptOrRejectNextSuggestion } from "./accept-reject-suggestions";
 
@@ -103,6 +104,8 @@ async function generateSuggestions(
 		requestPromise = openAiRequest(settings, oldText);
 	} else if (settings.llmProvider === "lmstudio") {
 		requestPromise = lmStudioRequest(settings, oldText);
+	} else if (settings.llmProvider === "gemini") {
+		requestPromise = geminiRequest(settings, oldText);
 	} else {
 		new Notice(`Unknown LLM provider: ${settings.llmProvider}`);
 		notice.hide();
@@ -136,7 +139,7 @@ async function generateSuggestions(
 
 	// Basic notification that changes are ready (no buttons here)
 	const pluralS = changeCount === 1 ? "" : "s";
-	const costString = settings.llmProvider === "openai" && cost ? `est. cost: $${cost.toFixed(4)}` : "";
+	const costString = settings.llmProvider === "openai" && cost && cost > 0 ? `est. cost: $${cost.toFixed(4)}` : "";
 	const infoMsg = [`🤖 ${changeCount} suggestion${pluralS} ready.`, costString].filter(Boolean).join("\n\n");
 	new Notice(infoMsg, initialNotifDuration);
 

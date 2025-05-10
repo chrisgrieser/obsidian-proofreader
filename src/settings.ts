@@ -41,11 +41,13 @@ type OpenAiModels = keyof typeof MODEL_SPECS;
 //──────────────────────────────────────────────────────────────────────────────
 
 export const DEFAULT_SETTINGS = {
-	llmProvider: "openai" as "openai" | "lmstudio",
+	llmProvider: "openai" as "openai" | "lmstudio" | "gemini",
 	lmStudioServerUrl: "http://localhost:1234",
 	lmStudioReasoningEnabled: false,
 	openAiApiKey: "",
 	openAiModel: "gpt-4.1-nano" as OpenAiModels,
+	geminiApiKey: "",
+	geminiModel: "gemini-1.5-flash-latest", // Default model, will be string
 	staticPrompt:
 		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
 	preserveTextInsideQuotes: false,
@@ -78,9 +80,10 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				dropdown
 					.addOption("openai", "OpenAI")
 					.addOption("lmstudio", "LM Studio")
+					.addOption("gemini", "Gemini")
 					.setValue(settings.llmProvider)
 					.onChange(async (value: string) => {
-						settings.llmProvider = value as "openai" | "lmstudio";
+						settings.llmProvider = value as "openai" | "lmstudio" | "gemini";
 						await this.plugin.saveSettings();
 						this.display(); // Re-render the settings page
 					});
@@ -196,6 +199,102 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 							await this.plugin.saveSettings();
 						}),
 				);
+		} else if (settings.llmProvider === "gemini") {
+			// Gemini Specific Settings
+			new Setting(containerEl).setName("Gemini API key").addText((input: TextComponent) => {
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("Enter your Gemini API key")
+					.setValue(settings.geminiApiKey)
+					.onChange(async (value: string) => {
+						settings.geminiApiKey = value.trim();
+						await this.plugin.saveSettings();
+						this.display(); // Re-render to update model list if API key changes
+					});
+			});
+
+			const geminiModelSetting = new Setting(containerEl)
+				.setName("Model")
+				.setDesc("Select a Gemini model. Ensure your API key is set and valid. Models are fetched from the Gemini API.");
+
+			geminiModelSetting.addButton((button: ButtonComponent) => {
+				button
+					.setButtonText("Refresh Models")
+					.setCta()
+					.onClick(async () => {
+						this.display(); // Re-render to fetch and display models
+					});
+			});
+
+			geminiModelSetting.addDropdown(async (dropdown: DropdownComponent) => {
+				if (!settings.geminiApiKey) {
+					dropdown.addOption("", "API Key required to list models");
+					dropdown.setDisabled(true);
+					return;
+				}
+
+				try {
+					const response = await requestUrl({
+						url: `https://generativelanguage.googleapis.com/v1beta/models?key=${settings.geminiApiKey}`,
+						method: "GET",
+					});
+
+					if (response.status !== 200) {
+						console.error("Gemini API error fetching models:", response);
+						let errorMsg = `Failed to fetch models (Status: ${response.status})`;
+						if (response.json?.error?.message) {
+							errorMsg += `: ${response.json.error.message}`;
+						}
+						dropdown.addOption("", errorMsg);
+						dropdown.setDisabled(true);
+						return;
+					}
+
+					const data = response.json;
+					const models = (data.models || [])
+						.filter((model: any) => model.supportedGenerationMethods?.includes("generateContent") && model.name?.startsWith("models/gemini-"))
+						.sort((a: any, b: any) => a.displayName.localeCompare(b.displayName));
+
+
+					if (models.length === 0) {
+						dropdown.addOption("", "No compatible Gemini models found or API key invalid.");
+						dropdown.setDisabled(true);
+					} else {
+						models.forEach((model: { name: string; displayName: string }) => {
+							const modelId = model.name.replace("models/", "");
+							dropdown.addOption(modelId, model.displayName || modelId);
+						});
+
+						const currentModelIsValid = models.some((m: { name: string }) => m.name.replace("models/", "") === settings.geminiModel);
+						if (!currentModelIsValid && models.length > 0) {
+							const defaultModelId = models[0].name.replace("models/", "");
+							settings.geminiModel = defaultModelId;
+							await this.plugin.saveSettings();
+						} else if (!settings.geminiModel && models.length > 0) {
+							// if settings.geminiModel was empty string
+							const defaultModelId = models[0].name.replace("models/", "");
+							settings.geminiModel = defaultModelId;
+							await this.plugin.saveSettings();
+						}
+					}
+				} catch (error) {
+					console.error("Error fetching Gemini models:", error);
+					let errorText = "Error fetching models. Check API key, network, or console.";
+					if (error instanceof Error) {
+						// Check for specific error messages if needed, e.g. for 403 Forbidden
+						if (error.message.includes("403")) {
+							errorText = "Access denied. Check API key permissions.";
+						}
+					}
+					dropdown.addOption("", errorText);
+					dropdown.setDisabled(true);
+				}
+				dropdown.setValue(settings.geminiModel).onChange(async (value: string) => {
+					settings.geminiModel = value;
+					await this.plugin.saveSettings();
+				});
+			});
 		}
 
 		//────────────────────────────────────────────────────────────────────────
