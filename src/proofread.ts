@@ -1,9 +1,10 @@
 import { Change, diffWords } from "diff";
-import { Editor, Notice, getFrontMatterInfo, Platform, EditorPosition } from "obsidian";
+import { Editor, Notice, getFrontMatterInfo, Platform, EditorPosition, Menu, MenuItem } from "obsidian";
 import Proofreader from "./main";
 import { openAiRequest } from "./openai-request";
 import { lmStudioRequest } from "./lmstudio-request";
 import { ProofreaderSettings } from "./settings";
+import { acceptOrRejectNextSuggestion } from "./accept-reject-suggestions";
 
 // DOCS https://github.com/kpdecker/jsdiff#readme
 function getDiffMarkdown(
@@ -51,13 +52,24 @@ function getDiffMarkdown(
 	return { textWithSuggestions: textWithSuggestions, changeCount: changeCount };
 }
 
-async function validateAndGetChangesAndNotify(
+// Structure to be returned by validateAndGetSuggestions
+interface SuggestionGenerationResult {
+	textWithSuggestions: string;
+	oldText: string;
+	changeCount: number;
+	cost?: number;
+	isOverlength?: boolean;
+	originalRange?: { from: EditorPosition; to: EditorPosition };
+}
+
+// Renamed and refactored: This function now only gets suggestions and does not notify or show UI.
+async function generateSuggestions(
 	plugin: Proofreader,
 	editor: Editor,
 	oldText: string,
 	scope: string,
-	originalRange?: { from: EditorPosition; to: EditorPosition }
-): Promise<string | undefined> {
+	originalRange?: { from: EditorPosition; to: EditorPosition } 
+): Promise<SuggestionGenerationResult | undefined> {
 	const { app, settings } = plugin;
 
 	// GUARD valid start-text
@@ -73,16 +85,11 @@ async function validateAndGetChangesAndNotify(
 		return;
 	}
 
-	// parameters
 	const fileBefore = app.workspace.getActiveFile()?.path;
 	const longInput = oldText.length > 1500;
 	const veryLongInput = oldText.length > 15000;
-	// Proofreading a document likely takes longer, we want to keep the finishing
-	// message in case the user went afk. (In the Notice API, duration 0 means
-	// keeping the notice until the user dismisses it.)
-	const notifDuration = longInput ? 0 : 4_000;
+	const initialNotifDuration = longInput ? 0 : 4_000;
 
-	// notify on start
 	let msg = `🤖 ${scope} is being proofread…`;
 	if (longInput) {
 		msg += "\n\nDue to the length of the text, this may take a moment.";
@@ -91,7 +98,6 @@ async function validateAndGetChangesAndNotify(
 	}
 	const notice = new Notice(msg, 0);
 
-	// perform request, check that file is still the same
 	let requestPromise;
 	if (settings.llmProvider === "openai") {
 		requestPromise = openAiRequest(settings, oldText);
@@ -112,119 +118,146 @@ async function validateAndGetChangesAndNotify(
 	const fileAfter = app.workspace.getActiveFile()?.path;
 	if (fileBefore !== fileAfter) {
 		const errmsg = "⚠️ The active file changed since the proofread has been triggered. Aborting.";
-		new Notice(errmsg, notifDuration);
+		new Notice(errmsg, initialNotifDuration);
 		return;
 	}
 
-	// check if diff is even needed
 	const { textWithSuggestions, changeCount } = getDiffMarkdown(
 		settings,
 		oldText,
 		newText,
 		isOverlength,
 	);
-	if (newText === oldText || textWithSuggestions === oldText) {
-		new Notice("✅ Text is good, nothing to change.", notifDuration);
+
+	if (newText === oldText || textWithSuggestions === oldText || changeCount === 0) {
+		new Notice("✅ Text is good, nothing to change.", initialNotifDuration);
 		return;
 	}
 
-	// notify on changes
+	// Basic notification that changes are ready (no buttons here)
 	const pluralS = changeCount === 1 ? "" : "s";
 	const costString = settings.llmProvider === "openai" && cost ? `est. cost: $${cost.toFixed(4)}` : "";
+	const infoMsg = [`🤖 ${changeCount} suggestion${pluralS} ready.`, costString].filter(Boolean).join("\n\n");
+	new Notice(infoMsg, initialNotifDuration);
 
-	const noticeMessage = document.createDocumentFragment();
-	noticeMessage.appendText(`🤖 ${changeCount} change${pluralS} made.`);
-	if (costString) {
-		noticeMessage.appendChild(document.createElement("br"));
-		noticeMessage.appendChild(document.createElement("br"));
-		noticeMessage.appendText(costString);
+	const returnPayload: SuggestionGenerationResult = {
+		textWithSuggestions,
+		oldText,
+		changeCount,
+		cost,
+		isOverlength,
+	};
+	if (originalRange) {
+		returnPayload.originalRange = originalRange;
 	}
-
-	const noticeWithActions = new Notice(noticeMessage, 0);
-
-	// Create action buttons if running in a desktop environment and originalRange is defined
-	if (!Platform.isMobile && originalRange) {
-		const suggestionStartPos = originalRange.from;
-
-		// Calculate end position based on textWithSuggestions content and its start position
-		let currentLineNum = suggestionStartPos.line;
-		let currentCharPos = suggestionStartPos.ch;
-		const linesInSuggestion = textWithSuggestions ? textWithSuggestions.split("\n") : [""];
-
-		if (linesInSuggestion.length === 1) {
-			currentCharPos = suggestionStartPos.ch + linesInSuggestion[0].length; 
-		} else {
-			currentLineNum = suggestionStartPos.line + linesInSuggestion.length - 1;
-			// For the last line, ch is its length. If it started at ch 0 of that new line.
-			// However, the original diff logic places it relative to the start of the *first* line of the suggestion.
-			// The most robust way is to use offsets IF the initial text insertion is also done via offsets or if we can precisely get the range of that insertion.
-			// Given the current replaceRange/setLine for initial insertion, let's stick to a simpler line/char calculation for now.
-			// This part can be tricky if the original selection wasn't from ch: 0.
-			// For simplicity, if multi-line, the char pos of the last line of suggestion is its length.
-			currentCharPos = linesInSuggestion[linesInSuggestion.length - 1].length;
-		}
-		const actualSuggestionEndPos: EditorPosition = { line: currentLineNum, ch: currentCharPos };
-
-		// DEBUGGING LOGS
-		console.log("[Proofreader] Debug Info for Accept/Reject:");
-		console.log("Original Text (oldText):", JSON.stringify(oldText));
-		console.log("AI Output (newText from result):", JSON.stringify(result?.newText)); // Log the raw AI output
-		console.log("Text with Suggestions (textWithSuggestions):", JSON.stringify(textWithSuggestions));
-		console.log("Original Range From:", originalRange.from, "To:", originalRange.to);
-		console.log("Calculated Suggestion End Position (actualSuggestionEndPos):", actualSuggestionEndPos);
-
-		const actionsEl = noticeWithActions.noticeEl.createDiv({ cls: "proofreader-actions" });
-		actionsEl.style.marginTop = "10px";
-
-		const acceptBtn = actionsEl.createEl("button", { text: "Accept All" });
-		acceptBtn.style.marginRight = "10px";
-		acceptBtn.addEventListener("click", () => {
-			const acceptedText = removeMarkup(textWithSuggestions, "accept");
-			console.log("[Proofreader] Accepting - Accepted Text:", JSON.stringify(acceptedText));
-			console.log("[Proofreader] Accepting - Replacing Range From:", suggestionStartPos, "To:", actualSuggestionEndPos);
-			editor.replaceRange(acceptedText, suggestionStartPos, actualSuggestionEndPos);
-			noticeWithActions.hide();
-			new Notice("✅ Suggestions accepted.");
-		});
-
-		const rejectBtn = actionsEl.createEl("button", { text: "Reject All" });
-		rejectBtn.addEventListener("click", () => {
-			console.log("[Proofreader] Rejecting - Original Text:", JSON.stringify(oldText));
-			console.log("[Proofreader] Rejecting - Replacing Range From:", suggestionStartPos, "To:", actualSuggestionEndPos);
-			editor.replaceRange(oldText, suggestionStartPos, actualSuggestionEndPos);
-			noticeWithActions.hide();
-			new Notice("❌ Suggestions rejected.");
-		});
-	}
-
-	return textWithSuggestions;
+	return returnPayload;
 }
 
-// Helper function (might need to be moved or imported from accept-reject-suggestions.ts if we refactor)
+// Helper function (removeMarkup remains the same)
 function removeMarkup(text: string, mode: "accept" | "reject"): string {
 	return mode === "accept"
 		? text.replace(/==/g, "").replace(/~~.*?~~/g, "")
 		: text.replace(/~~/g, "").replace(/==.*?==/g, "");
 }
 
+// New function to show the suggestion menu
+function showSuggestionMenu(
+	plugin: Proofreader,
+	editor: Editor,
+	textWithSuggestions: string,
+	oldText: string,
+	suggestionStartPos: EditorPosition,
+	suggestionEndPos: EditorPosition,
+	scope: string
+) {
+	if (Platform.isMobile) return; // No menu on mobile for now
+
+	const menu = new Menu();
+
+	menu.addItem((item: MenuItem) => {
+		item.setTitle("Accept All Suggestions")
+			.setIcon("check-check")
+			.onClick(() => {
+				const acceptedText = removeMarkup(textWithSuggestions, "accept");
+				editor.replaceRange(acceptedText, suggestionStartPos, suggestionEndPos);
+				new Notice("✅ Suggestions accepted.");
+			});
+	});
+
+	menu.addItem((item: MenuItem) => {
+		item.setTitle("Reject All Suggestions")
+			.setIcon("x")
+			.onClick(() => {
+				editor.replaceRange(oldText, suggestionStartPos, suggestionEndPos);
+				new Notice("❌ Suggestions rejected.");
+			});
+	});
+
+	menu.addSeparator();
+
+	// TODO: Add "Accept Next" and "Reject Next" items and logic for iterative application
+	// For now, placeholder for Accept Next
+	menu.addItem((item: MenuItem) => {
+		item.setTitle("Accept Next Suggestion (WIP)")
+			.setIcon("chevrons-right")
+			.onClick(() => {
+				// Placeholder: Call acceptOrRejectNextSuggestion(editor, "accept");
+				// Need to handle menu persistence/re-showing
+				new Notice("Accept Next - WIP");
+			});
+	});
+
+	// Placeholder for Reject Next
+	menu.addItem((item: MenuItem) => {
+		item.setTitle("Reject Next Suggestion (WIP)")
+			.setIcon("chevrons-right") // Could use a different icon for reject next
+			.onClick(() => {
+				new Notice("Reject Next - WIP");
+			});
+	});
+
+	// Position the menu near the start of the suggestions
+	const coords = editor.cm.coordsAtPos(editor.posToOffset(suggestionStartPos));
+	if (coords) {
+		menu.showAtPosition({ x: coords.left, y: coords.bottom + 5 }); // Show slightly below the start
+	} else {
+		// Fallback if coordinates can't be determined
+		menu.showAtPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+	}
+}
+
 //──────────────────────────────────────────────────────────────────────────────
 
 export async function proofreadDocument(plugin: Proofreader, editor: Editor): Promise<void> {
 	const noteWithFrontmatter = editor.getValue();
-	const bodyStart = getFrontMatterInfo(noteWithFrontmatter).contentStart || 0;
-	const bodyEnd = noteWithFrontmatter.length;
-	const oldText = noteWithFrontmatter.slice(bodyStart);
+	const bodyStartOffset = getFrontMatterInfo(noteWithFrontmatter).contentStart || 0;
+	const oldText = noteWithFrontmatter.slice(bodyStartOffset);
 
-	// Define the range for the entire document body for accept/reject actions
-	const bodyStartPos = editor.offsetToPos(bodyStart);
-	const bodyEndPos = editor.offsetToPos(bodyEnd);
-	const docRange = { from: bodyStartPos, to: bodyEndPos };
+	const bodyInitialStartPos = editor.offsetToPos(bodyStartOffset);
+	const bodyInitialEndPos = editor.offsetToPos(noteWithFrontmatter.length);
+	const docOriginalRange = { from: bodyInitialStartPos, to: bodyInitialEndPos };
 
-	const changes = await validateAndGetChangesAndNotify(plugin, editor, oldText, "Document", docRange);
-	if (!changes) return;
+	const result = await generateSuggestions(plugin, editor, oldText, "Document", docOriginalRange);
+	if (!result || !result.textWithSuggestions) return;
 
-	editor.replaceRange(changes, docRange.from, docRange.to);
-	editor.setCursor(docRange.from); // to start of doc body
+	// Apply the suggestions to the editor first
+	editor.replaceRange(result.textWithSuggestions, docOriginalRange.from, docOriginalRange.to);
+	editor.setCursor(docOriginalRange.from); 
+
+	// Now calculate the actual end position of the inserted suggestions
+	const actualSuggestionEndOffset = bodyStartOffset + result.textWithSuggestions.length;
+	const actualSuggestionEndPos = editor.offsetToPos(actualSuggestionEndOffset);
+
+	// Show the menu
+	showSuggestionMenu(
+		plugin,
+		editor,
+		result.textWithSuggestions,
+		result.oldText,
+		docOriginalRange.from,
+		actualSuggestionEndPos,
+		"Document"
+	);
 }
 
 export async function proofreadText(plugin: Proofreader, editor: Editor): Promise<void> {
@@ -234,28 +267,49 @@ export async function proofreadText(plugin: Proofreader, editor: Editor): Promis
 		return;
 	}
 
-	const cursor = editor.getCursor("from"); // `from` gives start if selection
+	const cursor = editor.getCursor("from");
 	const selection = editor.getSelection();
 	const oldText = selection || editor.getLine(cursor.line);
 	const scope = selection ? "Selection" : "Paragraph";
 
-	let originalRange: { from: EditorPosition; to: EditorPosition };
-	if (selection) {
-		originalRange = { from: editor.getCursor("from"), to: editor.getCursor("to") };
-	} else {
-		const lineStart = { line: cursor.line, ch: 0 };
-		const lineEnd = { line: cursor.line, ch: editor.getLine(cursor.line).length };
-		originalRange = { from: lineStart, to: lineEnd };
-	}
-
-	const changes = await validateAndGetChangesAndNotify(plugin, editor, oldText, scope, originalRange);
-	if (!changes) return;
+	let textInitialStartPos: EditorPosition;
+	let textInitialEndPos: EditorPosition;
+	let originalContentOffsetStart: number;
 
 	if (selection) {
-		editor.replaceSelection(changes);
-		editor.setCursor(originalRange.from); 
+		textInitialStartPos = editor.getCursor("from");
+		textInitialEndPos = editor.getCursor("to");
+		originalContentOffsetStart = editor.posToOffset(textInitialStartPos);
 	} else {
-		editor.setLine(cursor.line, changes);
-		editor.setCursor({ line: cursor.line, ch: 0 }); 
+		textInitialStartPos = { line: cursor.line, ch: 0 };
+		textInitialEndPos = { line: cursor.line, ch: editor.getLine(cursor.line).length };
+		originalContentOffsetStart = editor.posToOffset(textInitialStartPos);
 	}
+	const textOriginalRange = { from: textInitialStartPos, to: textInitialEndPos };
+
+	const result = await generateSuggestions(plugin, editor, oldText, scope, textOriginalRange);
+	if (!result || !result.textWithSuggestions) return;
+
+	// Apply the suggestions to the editor first
+	if (selection) {
+		editor.replaceSelection(result.textWithSuggestions);
+	} else {
+		editor.setLine(cursor.line, result.textWithSuggestions);
+	}
+	editor.setCursor(textOriginalRange.from);
+
+	// Now calculate the actual end position of the inserted suggestions
+	const actualSuggestionEndOffset = originalContentOffsetStart + result.textWithSuggestions.length;
+	const actualSuggestionEndPos = editor.offsetToPos(actualSuggestionEndOffset);
+
+	// Show the menu
+	showSuggestionMenu(
+		plugin,
+		editor,
+		result.textWithSuggestions,
+		result.oldText,
+		textOriginalRange.from,
+		actualSuggestionEndPos,
+		scope
+	);
 }
