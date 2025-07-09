@@ -1,7 +1,7 @@
 import { Notice, type RequestUrlResponse, requestUrl } from "obsidian";
+import type { ProviderAdapter } from "src/providers/adapter";
+import { MODEL_SPECS } from "src/providers/model-info";
 import { logError } from "src/utils";
-import type { ProviderAdapter } from "./adapter";
-import { MODEL_SPECS } from "./model-info";
 
 export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 	if (!settings.openAiApiKey) {

@@ -1,10 +1,10 @@
 import { type Change, diffWords, diffWordsWithSpace } from "diff";
 import { type Editor, getFrontMatterInfo, Notice } from "obsidian";
-import { rejectChanges } from "./accept-reject-suggestions";
-import type Proofreader from "./main";
-import type { ModelName, ProviderAdapter } from "./providers/adapter";
-import { MODEL_SPECS, PROVIDER_REQUEST_MAP } from "./providers/model-info";
-import type { ProofreaderSettings } from "./settings";
+import { rejectChanges } from "src/accept-reject-suggestions";
+import type Proofreader from "src/main";
+import type { ModelName, ProviderAdapter } from "src/providers/adapter";
+import { MODEL_SPECS, PROVIDER_REQUEST_MAP } from "src/providers/model-info";
+import type { ProofreaderSettings } from "src/settings";
 
 function getDiffMarkdown(
 	settings: ProofreaderSettings,

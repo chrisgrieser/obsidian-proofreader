@@ -1,5 +1,5 @@
-import type { ProviderAdapter, ProviderName } from "./adapter";
-import { openAiRequest } from "./openai";
+import type { ProviderAdapter, ProviderName } from "src/providers/adapter";
+import { openAiRequest } from "src/providers/openai";
 
 export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
 	openai: openAiRequest,

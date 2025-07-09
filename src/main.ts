@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
-import { acceptOrRejectInText, acceptOrRejectNextSuggestion } from "./accept-reject-suggestions";
-import { proofreadDocument, proofreadText } from "./proofread";
-import { DEFAULT_SETTINGS, type ProofreaderSettings, ProofreaderSettingsMenu } from "./settings";
+import { acceptOrRejectInText, acceptOrRejectNextSuggestion } from "src/accept-reject-suggestions";
+import { proofreadDocument, proofreadText } from "src/proofread";
+import { DEFAULT_SETTINGS, type ProofreaderSettings, ProofreaderSettingsMenu } from "src/settings";
 
 export default class Proofreader extends Plugin {
 	settings: ProofreaderSettings = DEFAULT_SETTINGS;
@@ -58,7 +58,7 @@ export default class Proofreader extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		// Ensure default values are not written, so the user will not load
-		// oudated defaults when the default settings are changed.
+		// outdated defaults when the default settings are changed.
 		const settings = structuredClone(this.settings);
 		for (const key in settings) {
 			if (!Object.hasOwn(settings, key)) continue;

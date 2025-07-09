@@ -1,5 +1,5 @@
-import type { MODEL_SPECS } from "src/providers/model-info";
-import type { ProofreaderSettings } from "src/settings";
+import type { MODEL_SPECS } from "src/providers/model-info.ts";
+import type { ProofreaderSettings } from "src/settings.ts";
 
 type ProviderResponse = {
 	newText: string; // output text from LLM

@@ -1,7 +1,7 @@
 import { PluginSettingTab, Setting } from "obsidian";
-import type Proofreader from "./main";
-import type { ModelName } from "./providers/adapter";
-import { MODEL_SPECS } from "./providers/model-info";
+import type Proofreader from "src/main";
+import type { ModelName } from "src/providers/adapter";
+import { MODEL_SPECS } from "src/providers/model-info";
 
 export const DEFAULT_SETTINGS = {
 	openAiApiKey: "",
