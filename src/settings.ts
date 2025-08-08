@@ -5,7 +5,7 @@ import { MODEL_SPECS } from "src/providers/model-info";
 
 export const DEFAULT_SETTINGS = {
 	openAiApiKey: "",
-	model: "gpt-4.1-nano" as ModelName,
+	model: "gpt-5-nano" as ModelName,
 	staticPrompt:
 		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
 	preserveTextInsideQuotes: false,

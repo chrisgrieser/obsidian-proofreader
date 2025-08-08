@@ -61,7 +61,6 @@ export default class Proofreader extends Plugin {
 		// outdated defaults when the default settings are changed.
 		const settings = structuredClone(this.settings);
 		for (const key in settings) {
-			if (!Object.hasOwn(settings, key)) continue;
 			const name = key as keyof ProofreaderSettings;
 			// @ts-expect-error intentional removal
 			if (settings[name] === DEFAULT_SETTINGS[name]) settings[name] = undefined;
@@ -71,15 +70,6 @@ export default class Proofreader extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		const settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-
-		// DEPRECATION (2025-05-18)
-		if (settings.openAiModel) {
-			settings.model = settings.openAiModel;
-			settings.openAiModel = undefined;
-			this.saveData(settings);
-		}
-
-		this.settings = settings;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 }
