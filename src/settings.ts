@@ -55,7 +55,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("Model")
 			.setDesc(
 				"The nano model is slightly quicker and cheaper. " +
-					"The mini model is slightly higher quality, but also more expensive. ",
+					"The mini model is more accurate, but also more expensive. ",
 			)
 			.addDropdown((dropdown) => {
 				for (const key in MODEL_SPECS) {
@@ -70,7 +70,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Reasoning effort")
-			.setDesc("Higher uses more tokens, but produces better results.")
+			.setDesc("Higher uses more tokens and is slower, but produces better results.")
 			.addDropdown((dropdown) => {
 				for (const option of reasoningEffortOptions) {
 					dropdown.addOption(option, option);
