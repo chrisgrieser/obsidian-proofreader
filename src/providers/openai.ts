@@ -11,16 +11,17 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 
 	let response: RequestUrlResponse;
 	try {
-		// DOCS https://platform.openai.com/docs/api-reference/chat
+		// DOCS https://platform.openai.com/docs/api-reference/responses/create
 		response = await requestUrl({
-			url: "https://api.openai.com/v1/chat/completions",
+			url: "https://api.openai.com/v1/responses",
 			method: "POST",
 			contentType: "application/json",
 			// biome-ignore lint/style/useNamingConvention: not by me
 			headers: { Authorization: "Bearer " + settings.openAiApiKey },
 			body: JSON.stringify({
 				model: settings.model,
-				messages: [
+				reasoning: { effort: settings.reasoningEffort },
+				input: [
 					{ role: "developer", content: settings.staticPrompt },
 					{ role: "user", content: oldText },
 				],
@@ -36,7 +37,12 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 		logError(error);
 		return;
 	}
-	const newText = response.json?.choices?.[0].message.content;
+
+	// DOCS https://platform.openai.com/docs/api-reference/responses/get
+	// biome-ignore format: clearer this way
+	const newText = response.json?.output
+		?.find((item: { role: string; content: { text: string }[] }) => item.role === "assistant")
+		?.content[0].text;
 	if (!newText) {
 		logError(response);
 		return;

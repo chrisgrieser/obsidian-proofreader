@@ -3,9 +3,14 @@ import type Proofreader from "src/main";
 import type { ModelName } from "src/providers/adapter";
 import { MODEL_SPECS } from "src/providers/model-info";
 
+// https://platform.openai.com/docs/api-reference/responses/object#responses/object-reasoning
+const reasoningEffortOptions = ["minimal", "low", "medium", "high"] as const;
+type ReasoningEffort = (typeof reasoningEffortOptions)[number];
+
 export const DEFAULT_SETTINGS = {
 	openAiApiKey: "",
 	model: "gpt-5-nano" as ModelName,
+	reasoningEffort: "minimal" as ReasoningEffort,
 	staticPrompt:
 		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
 	preserveTextInsideQuotes: false,
@@ -54,12 +59,24 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			)
 			.addDropdown((dropdown) => {
 				for (const key in MODEL_SPECS) {
-					if (!Object.hasOwn(MODEL_SPECS, key)) continue;
 					const model = MODEL_SPECS[key as ModelName];
 					dropdown.addOption(key, model.displayText);
 				}
 				dropdown.setValue(settings.model).onChange(async (value) => {
 					settings.model = value as ModelName;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName("Reasoning effort")
+			.setDesc("Higher uses more tokens, but produces better results.")
+			.addDropdown((dropdown) => {
+				for (const option of reasoningEffortOptions) {
+					dropdown.addOption(option, option);
+				}
+				dropdown.setValue(settings.reasoningEffort).onChange(async (value) => {
+					settings.reasoningEffort = value as ReasoningEffort;
 					await this.plugin.saveSettings();
 				});
 			});
