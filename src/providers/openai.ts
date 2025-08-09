@@ -34,7 +34,7 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 			new Notice(msg, 6_000);
 			return;
 		}
-		logError(error);
+		logError("OpenAI request failed.", error);
 		return;
 	}
 
@@ -44,7 +44,7 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 		?.find((item: { role: string; content: { text: string }[] }) => item.role === "assistant")
 		?.content[0].text;
 	if (!newText) {
-		logError(response);
+		logError("Invalid structure of OpenAI response.", response);
 		return;
 	}
 
