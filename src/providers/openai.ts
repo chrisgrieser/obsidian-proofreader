@@ -9,11 +9,13 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 		return;
 	}
 
+	const endpoint = settings.openAiEndpoint || "https://api.openai.com/v1/responses";
+
 	let response: RequestUrlResponse;
 	try {
 		// DOCS https://platform.openai.com/docs/api-reference/responses/create
 		response = await requestUrl({
-			url: "https://api.openai.com/v1/responses",
+			url: endpoint,
 			method: "POST",
 			contentType: "application/json",
 			// biome-ignore lint/style/useNamingConvention: not by me

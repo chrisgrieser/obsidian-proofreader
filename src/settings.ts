@@ -11,12 +11,15 @@ export const DEFAULT_SETTINGS = {
 	openAiApiKey: "",
 	model: "gpt-5-nano" as ModelName,
 	reasoningEffort: "minimal" as ReasoningEffort,
-	staticPrompt:
-		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
+	openAiEndpoint: "",
+
 	preserveTextInsideQuotes: false,
 	preserveBlockquotes: false,
 	preserveNonSmartPuncation: false,
 	diffWithSpace: false,
+
+	staticPrompt:
+		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
 };
 
 export type ProofreaderSettings = typeof DEFAULT_SETTINGS;
@@ -38,8 +41,15 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		containerEl.empty();
 
+		//────────────────────────────────────────────────────────────────────────
+		// OpenAI settings
+		new Setting(containerEl).setName("OpenAI settings").setHeading();
+
 		// API KEYS
-		new Setting(containerEl).setName("OpenAI API key").addText((input) => {
+		new Setting(containerEl)
+			.setName("API key")
+			.setDesc("Get your API key from https://platform.openai.com/api-keys")
+			.addText((input) => {
 			input.inputEl.type = "password"; // obfuscates the field
 			input.inputEl.setCssProps({ width: "100%" });
 			input
@@ -79,6 +89,24 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					settings.reasoningEffort = value as ReasoningEffort;
 					await this.plugin.saveSettings();
 				});
+			});
+
+		new Setting(containerEl)
+			.setName("Advanced: URL Endpoint")
+			.setDesc(
+				"Endpoint for OpenAi-compatible models, using the API key from above. " +
+					"Leave empty to use the regular OpenAI API. " +
+					"Most users do not need to change this setting, only change this if you know what you are doing. ",
+			)
+			.addText((input) => {
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("https://...")
+					.setValue(settings.openAiEndpoint)
+					.onChange(async (value) => {
+						settings.openAiApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
 			});
 
 		//────────────────────────────────────────────────────────────────────────
@@ -143,8 +171,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("System prompt")
 			.setDesc(
 				"The LLM must respond ONLY with the updated text for this plugin to work. " +
-					"Most users do not need to change this setting. " +
-					"Only change this if you know what you are doing.",
+					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
 			.addTextArea((textarea) => {
 				textarea.inputEl.setCssProps({ width: "25vw", height: "15em" });
