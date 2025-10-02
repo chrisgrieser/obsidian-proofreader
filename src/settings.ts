@@ -19,7 +19,7 @@ export const DEFAULT_SETTINGS = {
 	diffWithSpace: false,
 
 	staticPrompt:
-		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text is:",
+		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text may contain Markdown formatting, which should be preserved when appropriate. The text is:",
 };
 
 export type ProofreaderSettings = typeof DEFAULT_SETTINGS;
@@ -50,16 +50,16 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("API key")
 			.setDesc("Get your API key from https://platform.openai.com/api-keys")
 			.addText((input) => {
-			input.inputEl.type = "password"; // obfuscates the field
-			input.inputEl.setCssProps({ width: "100%" });
-			input
-				.setPlaceholder("sk-123456789…")
-				.setValue(settings.openAiApiKey)
-				.onChange(async (value) => {
-					settings.openAiApiKey = value.trim();
-					await this.plugin.saveSettings();
-				});
-		});
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("sk-123456789…")
+					.setValue(settings.openAiApiKey)
+					.onChange(async (value) => {
+						settings.openAiApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
 
 		new Setting(containerEl)
 			.setName("Model")
@@ -153,8 +153,8 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("Preserve non-smart punctuation")
 			.setDesc(
 				"Prevent the AI from changing non-smart punctuation to their smart counterparts, " +
-					' for instance changing `"` to `“` or `12-34` to `12–34`. ' +
-					"This can be relevant when using tools like `pandoc`, which convert non-smart punctuation based on how they are configured.",
+					' for instance changing " to “ or 12-34 to 12–34. ' +
+					"This can be relevant when using tools like pandoc, which convert non-smart punctuation based on how they are configured.",
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(settings.preserveNonSmartPuncation).onChange(async (value) => {
