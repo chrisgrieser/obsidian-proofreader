@@ -65,7 +65,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("Model")
 			.setDesc(
 				"The nano model is slightly quicker and cheaper. " +
-					"The mini model is more accurate, but also more expensive. ",
+					"The mini model is more slightly more accurate, but also more expensive. ",
 			)
 			.addDropdown((dropdown) => {
 				for (const key in MODEL_SPECS) {
@@ -170,7 +170,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("System prompt")
 			.setDesc(
-				"The LLM must respond ONLY with the updated text for this plugin to work. " +
+				"The LLM must respond ONLY with the updated text for this plugin to work. Leave empty to reset to the default prompt." +
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
 			.addTextArea((textarea) => {
@@ -179,8 +179,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					.setValue(settings.staticPrompt)
 					.setPlaceholder("Make suggestions based on…")
 					.onChange(async (value) => {
-						if (value.trim() === "") return;
-						settings.staticPrompt = value.trim();
+						settings.staticPrompt = value.trim() || DEFAULT_SETTINGS.staticPrompt;
 						await this.plugin.saveSettings();
 					});
 			});
