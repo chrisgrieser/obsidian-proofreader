@@ -70,7 +70,11 @@ function getDiffMarkdown(
 		.replace(/~~(.+?)~~==(?:\1)(.{1,2})==/g, "$1==$2==") // only addition of 1-2 char
 		.replace(/ {2}(?!$)/gm, " "); // rare double spaces created by diff (not EoL due to 2-space-rule)
 
-	// PRESERVE SPECIAL CHARACTERS
+	// PRESERVE SPECIAL CONTENT
+	if (settings.preserveItalicAndBold) {
+		// bold/italic can be via * or _
+		textWithChanges = textWithChanges.replace(/~~(\*\*?|__?)~~/g, "");
+	}
 	if (settings.preserveNonSmartPuncation) {
 		textWithChanges = textWithChanges
 			.replace(/~~"~~==[“”]==/g, '"') // preserve non-smart quotes

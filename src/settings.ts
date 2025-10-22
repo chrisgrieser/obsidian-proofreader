@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = {
 	reasoningEffort: "minimal" as ReasoningEffort,
 	openAiEndpoint: "",
 
+	preserveItalicAndBold: false,
 	preserveTextInsideQuotes: false,
 	preserveBlockquotes: false,
 	preserveNonSmartPuncation: false,
@@ -134,6 +135,18 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.addToggle((toggle) =>
 				toggle.setValue(settings.preserveTextInsideQuotes).onChange(async (value) => {
 					settings.preserveTextInsideQuotes = value;
+					await this.plugin.saveSettings();
+				}),
+			);
+		new Setting(containerEl)
+			.setName("Preserve Bold and Italic formatting")
+			.setDesc(
+				"Preserve **bold**, and *italic* formatting." +
+					"(This is not flawless, as the AI occasionally rewrite text alongside formatting changes.)",
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(settings.preserveItalicAndBold).onChange(async (value) => {
+					settings.preserveItalicAndBold = value;
 					await this.plugin.saveSettings();
 				}),
 			);
