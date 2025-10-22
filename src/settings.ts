@@ -129,7 +129,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("Preserve text inside quotes")
 			.setDesc(
 				'No changes will be made to text inside quotation marks (""). ' +
-					"Note that this is not perfect, as the AI will sometimes suggest changes across quotes.",
+					"(This is not flawless, as the AI sometimes suggests changes across quotes.)",
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(settings.preserveTextInsideQuotes).onChange(async (value) => {
@@ -141,7 +141,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setName("Preserve text in blockquotes and callouts")
 			.setDesc(
 				"No changes will be made to lines beginning with `>`. " +
-					"Note that this is not perfect, as the AI will sometimes suggest changes across paragraphs.",
+					"(This is not flawless, as the AI sometimes proposes changes across paragraphs.)",
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(settings.preserveBlockquotes).onChange(async (value) => {
@@ -152,9 +152,10 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Preserve non-smart punctuation")
 			.setDesc(
-				"Prevent the AI from changing non-smart punctuation to their smart counterparts, " +
-					' for instance changing " to “ or 12-34 to 12–34. ' +
-					"This can be relevant when using tools like pandoc, which convert non-smart punctuation based on how they are configured.",
+				"Prevent changing non-smart punctuation to their smart counterparts, " +
+					' for instance changing " to “ or 1-2 to 1–2. ' +
+					"This can be relevant for tools like pandoc, which automatically convert " +
+					"non-smart punctuation based on how they are configured. ",
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(settings.preserveNonSmartPuncation).onChange(async (value) => {

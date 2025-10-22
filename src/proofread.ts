@@ -77,8 +77,6 @@ function getDiffMarkdown(
 			.replace(/~~'~~==[‘’]==/g, "'")
 			.replace(/(\d)~~-~~==–==(\d)/g, "$1-$2"); // preserve non-smart dashes in number ranges
 	}
-
-	// PRESERVE QUOTES
 	if (settings.preserveBlockquotes) {
 		textWithChanges = textWithChanges
 			.replace(/^~~>~~/gm, ">") // if AI removes blockquote marker
