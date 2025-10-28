@@ -73,7 +73,10 @@ function getDiffMarkdown(
 	// PRESERVE SPECIAL CONTENT
 	if (settings.preserveItalicAndBold) {
 		// bold/italic can be via * or _
-		textWithChanges = textWithChanges.replace(/~~(\*\*?|__?)~~/g, "");
+		textWithChanges = textWithChanges
+			.replace(/~~(\*\*?|__?)~~/g, "$1") // just deletion of italic/bold
+			.replace(/~~(\*\*?|__?)([^~]+)~~/g, "$1~~$2~~") // italic bold delete with other content
+			.replace(/~~([^~]+)(\*\*?|__?)~~/g, "~~$1~~$2");
 	}
 	if (settings.preserveNonSmartPuncation) {
 		textWithChanges = textWithChanges
@@ -106,7 +109,7 @@ async function validateAndGetChangesAndNotify(
 	// GUARD outdated model
 	const model = MODEL_SPECS[settings.model as ModelName];
 	if (!model) {
-		const errmsg = `⚠️ The model "${settings.model}" is outdated. Please select a more recent one in the settings.`;
+		const errmsg = `! The model "${settings.model}" is outdated. Please select a more recent one in the settings.`;
 		new Notice(errmsg, 10_000);
 		return;
 	}
@@ -151,7 +154,7 @@ async function validateAndGetChangesAndNotify(
 	// check if active file changed
 	const fileAfter = app.workspace.getActiveFile()?.path;
 	if (fileBefore !== fileAfter) {
-		const errmsg = "⚠️ The active file changed since the proofread has been triggered. Aborting.";
+		const errmsg = "! The active file changed since the proofread has been triggered. Aborting.";
 		new Notice(errmsg, notifDuration);
 		return;
 	}
