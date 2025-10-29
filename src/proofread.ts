@@ -73,10 +73,7 @@ function getDiffMarkdown(
 	// PRESERVE SPECIAL CONTENT
 	if (settings.preserveItalicAndBold) {
 		// bold/italic can be via * or _
-		textWithChanges = textWithChanges
-			.replace(/~~(\*\*?|__?)~~/g, "$1") // just deletion of italic/bold
-			.replace(/~~(\*\*?|__?)([^~]+)~~/g, "$1~~$2~~") // italic bold delete with other content
-			.replace(/~~([^~]+)(\*\*?|__?)~~/g, "~~$1~~$2");
+		textWithChanges = textWithChanges.replace(/~~(\*\*?|__?)~~/g, "$1");
 	}
 	if (settings.preserveNonSmartPuncation) {
 		textWithChanges = textWithChanges
