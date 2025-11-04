@@ -19,7 +19,7 @@ echo "Done."
 
 echo "(3/4) Knip"
 npx knip
-test -t || echo "Done."
+echo "Done."
 
 echo "(4/4) Markdownlint"
 npx markdownlint --ignore="node_modules" .
