@@ -44,7 +44,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		//────────────────────────────────────────────────────────────────────────
 		// OpenAI settings
-		new Setting(containerEl).setName("OpenAI settings").setHeading();
+		new Setting(containerEl).setName("OpenAI").setHeading();
 
 		// API KEYS
 		new Setting(containerEl)
@@ -54,6 +54,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("sk-123456789…")
 					.setValue(settings.openAiApiKey)
 					.onChange(async (value) => {
@@ -93,7 +94,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Advanced: URL Endpoint")
+			.setName("Advanced: URL endpoint")
 			.setDesc(
 				"Endpoint for OpenAi-compatible models, using the API key from above. " +
 					"Leave empty to use the regular OpenAI API. " +
@@ -102,6 +103,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.addText((input) => {
 				input.inputEl.setCssProps({ width: "100%" });
 				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("https://...")
 					.setValue(settings.openAiEndpoint)
 					.onChange(async (value) => {
@@ -112,7 +114,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		//────────────────────────────────────────────────────────────────────────
 		// DIFF OPTIONS
-		new Setting(containerEl).setName("Diff options").setHeading();
+		new Setting(containerEl).setName("Diff").setHeading();
 
 		new Setting(containerEl)
 			.setName("Space-sensitive diff")
@@ -139,7 +141,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				}),
 			);
 		new Setting(containerEl)
-			.setName("Preserve Bold and Italic formatting")
+			.setName("Preserve bold and italic formatting")
 			.setDesc(
 				"Preserve **bold**, and *italic* formatting." +
 					"(This is not flawless, as the AI occasionally rewrite text alongside formatting changes.)",

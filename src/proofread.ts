@@ -164,6 +164,7 @@ async function validateAndGetChangesAndNotify(
 		isOverlength,
 	);
 	if (textWithSuggestions === oldText) {
+		// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 		new Notice("✅ Text is good, nothing to change.", notifDuration);
 		return;
 	}
