@@ -119,7 +119,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Space-sensitive diff")
 			.setDesc(
-				"Space-sensitive diff processes spaces more accurately, but results in smaller, more numerous changes.",
+				"Processes spaces more accurately, but results in smaller, more numerous changes.",
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(settings.diffWithSpace).onChange(async (value) => {
@@ -186,7 +186,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("System prompt")
 			.setDesc(
-				"The LLM must respond ONLY with the updated text for this plugin to work. Leave empty to reset to the default prompt." +
+				"The LLM must respond ONLY with the updated text for this plugin to work. Leave the text field empty to reset to the default prompt. " +
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
 			.addTextArea((textarea) => {
