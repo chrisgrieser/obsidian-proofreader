@@ -34,7 +34,7 @@ feature in word processing apps.
 - Easy to use: No complicated plugin settings and AI parameters to configure.
 
 |                                       | Professional proofreading service               | Proofreader plugin                                                           |
-| ----------------------------------    | ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| ------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
 | Cost for English text of 10,000 words | ~ $400, depending on the service                | ~ \$0.01 – $0.06[^1]                                                         |
 | Completion duration                   | up to 3 work days                               | about 5 minutes                                                              |
 | Input format                          | usually Microsoft Word (`.docx`)                | Markdown file in Obsidian                                                    |
