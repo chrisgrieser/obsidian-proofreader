@@ -15,14 +15,14 @@ feature in word processing apps.
 
 - [Features](#features)
 - [Installation & setup](#installation--setup)
-	* [Plugin installation](#plugin-installation)
-	* [Get an OpenAI API key](#get-an-openai-api-key)
+    - [Plugin installation](#plugin-installation)
+    - [Get an OpenAI API key](#get-an-openai-api-key)
 - [Usage](#usage)
 - [Visual appearance of the changes](#visual-appearance-of-the-changes)
 - [Testimonials](#testimonials)
 - [Plugin development](#plugin-development)
-	* [General](#general)
-	* [Adding support for new LLMs](#adding-support-for-new-llms)
+    - [General](#general)
+    - [Adding support for new LLMs](#adding-support-for-new-llms)
 - [About the developer](#about-the-developer)
 
 <!-- tocstop -->
@@ -42,9 +42,9 @@ feature in word processing apps.
 | Additional benefits                   | Editor makes general comments on writing style. | Plugin can also be used to quickly proofread single sentences or paragraphs. |
 
 [^1]: Estimated pricing for the [GPT 4.1 nano
-	model](https://platform.openai.com/docs/models/) in April 2025. The plugin
-	developer is not responsible if the actual costs differ. You can track your
-	usage costs [on this page](https://platform.openai.com/usage).
+    model](https://platform.openai.com/docs/models/) in April 2025. The plugin
+    developer is not responsible if the actual costs differ. You can track your
+    usage costs [on this page](https://platform.openai.com/usage).
 
 > [!NOTE]
 > This plugin requires an **OpenAI API key** and incurs costs at OpenAI based on
@@ -70,9 +70,9 @@ feature in word processing apps.
 ## Usage
 1. Use the command `Proofread selection/paragraph` to check the selected
    text. If there is no selection, the command will check the current paragraph.
-	* Alternatively, you can also check the whole document with `Proofread full
-	  document`. However, note that the quality of AI suggestions tends to
-	  decrease when proofreading too much text at once.
+    - Alternatively, you can also check the whole document with `Proofread full
+      document`. However, note that the quality of AI suggestions tends to
+      decrease when proofreading too much text at once.
 2. The changes are automatically inserted.
 3. Accept/reject changes with `Accept suggestions in selection/paragraph`
    and `Reject suggestions in selection/paragraph`.  
