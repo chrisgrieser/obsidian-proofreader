@@ -70,16 +70,16 @@ feature in word processing apps.
 ## Usage
 1. Use the command `Proofread selection/paragraph` to check the selected
    text. If there is no selection, the command will check the current paragraph.
-    - Alternatively, you can also check the whole document with `Proofread full
-      document`. However, note that the quality of AI suggestions tends to
-      decrease when proofreading too much text at once.
+   Alternatively, you can also check the whole document with `Proofread full
+   document`. However, note that the quality of AI suggestions tends to decrease
+   when proofreading too much text at once.
 2. The changes are automatically inserted.
-3. Accept/reject changes with `Accept suggestions in selection/paragraph`
-   and `Reject suggestions in selection/paragraph`.  
-   Same as the proofreading command, the `accept` and `reject` commands affect
-   the current paragraph if there is no selection. Alternatively, you can also
-   only accept/reject the next suggestion after your cursor via `Accept next
-   suggestion` and `Reject next suggestion`.
+3. Accept/reject changes with `Accept suggestions in selection/paragraph` and
+   `Reject suggestions in selection/paragraph`. Same as the proofreading
+   command, the `accept` and `reject` commands affect the current paragraph if
+   there is no selection. Alternatively, you can also only accept/reject the
+   next suggestion after your cursor via `Accept next suggestion` and `Reject
+   next suggestion`.
 
 ## Visual appearance of the changes
 You can add the following CSS snippet to make highlights and strikethroughs
@@ -98,7 +98,7 @@ appear like suggested changes, similar to the screenshot further above.
 
 ## Testimonials
 
-> I was paying $29 a month for type.ai until today, your plugin made me cancel
+> I was paying $29 a month for `type.ai` until today, your plugin made me cancel
 > the subscription, because the only feature I wanted from there was this inline
 > granular diffing which no other app offered, until Proofreader.
 > [@samwega](https://github.com/chrisgrieser/obsidian-proofreader/discussions/1#discussioncomment-12972780)
