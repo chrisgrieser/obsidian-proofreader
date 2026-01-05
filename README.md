@@ -125,7 +125,7 @@ just check  # runs the pre-commit hook (without committing)
 2. In [./src/providers/model-info.ts](./src/providers/model-info.ts), add the
    adapter function to `PROVIDER_ADAPTER_MAP`, and add models for the new
    provider to `MODEL_SPECS`.
-3. In [./src/settings.ts], add a setting for the API key to
+3. In [./src/settings.ts](./src/settings.ts), add a setting for the API key to
    `ProofreaderSettingsMenu` and add a field to `DEFAULT_SETTINGS`.
 
 ## About the developer
