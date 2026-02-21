@@ -2,6 +2,6 @@
 {
 	"entry": ["src/main.ts"],
 	"project": ["**/*.ts"],
-	"ignoreDependencies": ["eslint-plugin-obsidianmd"], // only used for eslint-LSP
+	"ignoreDependencies": ["eslint-plugin-obsidianmd"],
 	"$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
 }

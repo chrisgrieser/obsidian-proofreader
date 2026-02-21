@@ -43,6 +43,7 @@ function getDiffMarkdown(
 			added: false,
 			removed: false,
 			value: cutOffCallout,
+			count: cutOffCallout.length,
 		});
 	}
 
