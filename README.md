@@ -16,7 +16,7 @@ feature in word processing apps.
 - [Features](#features)
 - [Installation & setup](#installation--setup)
     - [Plugin installation](#plugin-installation)
-    - [Get an OpenAI API key](#get-an-openai-api-key)
+    - [Get an API key](#get-an-api-key)
 - [Usage](#usage)
 - [Visual appearance of the changes](#visual-appearance-of-the-changes)
 - [Testimonials](#testimonials)
@@ -47,7 +47,7 @@ feature in word processing apps.
     usage costs [on this page](https://platform.openai.com/usage).
 
 > [!NOTE]
-> This plugin requires an **OpenAI API key** and incurs costs at OpenAI based on
+> This plugin requires an **OpenAI or Google API key** and incurs costs based on
 > usage. Network requests are made when running the proofreading command. (PRs
 > [adding support for other LLMs](#adding-support-for-new-llms) are welcome.)
 
@@ -56,16 +56,28 @@ feature in word processing apps.
 ### Plugin installation
 [Install in Obsidian](https://obsidian.md/plugins?id=proofreader)
 
-### Get an OpenAI API key
+### Get an API key
+
+**OpenAI**
 1. [Create an OpenAI account](https://auth.openai.com/create-account).
 2. Go to [this site](https://platform.openai.com/api-keys), and click `Create
    new secret key`.
 3. Copy the API key.
-4. In Obsidian, go to `Settings → Proofreader` and paste your API key there.
+4. In Obsidian, go to `Settings → Proofreader → OpenAI` and paste your
+   API key there.
 
 > [!TIP]
 > The usage costs should not be very high, nonetheless you can track them
 > [on this page](https://platform.openai.com/usage).
+
+**Google**
+1. [Create a Google account](https://accounts.google.com/signup) if you
+   don't have one.
+2. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and
+   click `Create API key`.
+3. Copy the API key.
+4. In Obsidian, go to `Settings → Proofreader → Google` and paste your
+   API key there.
 
 ## Usage
 1. Use the command `Proofread selection/paragraph` to check the selected
@@ -123,7 +135,7 @@ just check  # runs the pre-commit hook (without committing)
 1. Create a new adapter for the LLM in
    [./src/providers/](./src/providers/). This should take ~50 lines of code.
 2. In [./src/providers/model-info.ts](./src/providers/model-info.ts), add the
-   adapter function to `PROVIDER_ADAPTER_MAP`, and add models for the new
+   adapter function to `PROVIDER_REQUEST_MAP`, and add models for the new
    provider to `MODEL_SPECS`.
 3. In [./src/settings.ts](./src/settings.ts), add a setting for the API key to
    `ProofreaderSettingsMenu` and add a field to `DEFAULT_SETTINGS`.
