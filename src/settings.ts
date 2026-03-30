@@ -9,6 +9,7 @@ type ReasoningEffort = (typeof reasoningEffortOptions)[number];
 
 export const DEFAULT_SETTINGS = {
 	openAiApiKey: "",
+	geminiApiKey: "",
 	model: "gpt-5-nano" as ModelName,
 	reasoningEffort: "minimal" as ReasoningEffort,
 	openAiEndpoint: "",
@@ -43,10 +44,25 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		containerEl.empty();
 
 		//────────────────────────────────────────────────────────────────────────
+		// Model selection
+		new Setting(containerEl)
+			.setName("Model")
+			.setDesc("Select the AI model to use for proofreading.")
+			.addDropdown((dropdown) => {
+				for (const key in MODEL_SPECS) {
+					const model = MODEL_SPECS[key as ModelName];
+					dropdown.addOption(key, model.displayText);
+				}
+				dropdown.setValue(settings.model).onChange(async (value) => {
+					settings.model = value as ModelName;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		//────────────────────────────────────────────────────────────────────────
 		// OpenAI settings
 		new Setting(containerEl).setName("OpenAI").setHeading();
 
-		// API KEYS
 		new Setting(containerEl)
 			.setName("API key")
 			.setDesc("Get your API key from https://platform.openai.com/api-keys")
@@ -61,23 +77,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 						settings.openAiApiKey = value.trim();
 						await this.plugin.saveSettings();
 					});
-			});
-
-		new Setting(containerEl)
-			.setName("Model")
-			.setDesc(
-				"The nano model is slightly quicker and cheaper. " +
-					"The mini model is more slightly more accurate, but also more expensive. ",
-			)
-			.addDropdown((dropdown) => {
-				for (const key in MODEL_SPECS) {
-					const model = MODEL_SPECS[key as ModelName];
-					dropdown.addOption(key, model.displayText);
-				}
-				dropdown.setValue(settings.model).onChange(async (value) => {
-					settings.model = value as ModelName;
-					await this.plugin.saveSettings();
-				});
 			});
 
 		new Setting(containerEl)
@@ -96,7 +95,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Advanced: URL endpoint")
 			.setDesc(
-				"Endpoint for OpenAi-compatible models, using the API key from above. " +
+				"Endpoint for OpenAI-compatible models, using the API key from above. " +
 					"Leave empty to use the regular OpenAI API. " +
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
@@ -107,7 +106,27 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					.setPlaceholder("https://...")
 					.setValue(settings.openAiEndpoint)
 					.onChange(async (value) => {
-						settings.openAiApiKey = value.trim();
+						settings.openAiEndpoint = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		//────────────────────────────────────────────────────────────────────────
+		// Google settings
+		new Setting(containerEl).setName("Google").setHeading();
+
+		new Setting(containerEl)
+			.setName("API key")
+			.setDesc("Get your API key from https://aistudio.google.com/app/apikey")
+			.addText((input) => {
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
+					.setPlaceholder("AIza…")
+					.setValue(settings.geminiApiKey)
+					.onChange(async (value) => {
+						settings.geminiApiKey = value.trim();
 						await this.plugin.saveSettings();
 					});
 			});

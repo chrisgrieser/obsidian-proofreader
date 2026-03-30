@@ -31,9 +31,19 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 		});
 		console.debug("[Proofreader plugin] OpenAI response", response);
 	} catch (error) {
-		if ((error as { status: number }).status === 401) {
-			const msg = "OpenAI API key is not valid. Please verify the key in the plugin settings.";
-			new Notice(msg, 6_000);
+		const status = (error as { status: number }).status;
+		if (status === 401) {
+			new Notice(
+				"OpenAI API key is not valid. Please verify the key in the plugin settings.",
+				6_000,
+			);
+			return;
+		}
+		if (status === 429) {
+			new Notice(
+				"OpenAI API rate limit reached. Please wait a moment before trying again.",
+				6_000,
+			);
 			return;
 		}
 		logError("OpenAI request failed.", error);
