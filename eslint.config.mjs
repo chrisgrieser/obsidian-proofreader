@@ -12,7 +12,6 @@ export default defineConfig([
 			parser: tsparser,
 			parserOptions: { project: "./tsconfig.json" },
 		},
-		// @ts-expect-error
 		plugins: { obsidianmd: obsidianmd },
 		rules: {
 			// PENDING https://github.com/obsidianmd/eslint-plugin/pull/70
@@ -43,11 +42,10 @@ export default defineConfig([
 		},
 	},
 	{
-		// @ts-expect-error
 		plugins: { obsidianmd: obsidianmd },
 		rules: {
 			// PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
-			"obsidianmd/ui/sentence-case": ["warn", { brands: ["OpenAI"] }],
+			"obsidianmd/ui/sentence-case": ["warn", { brands: ["OpenAI", "Google"] }],
 		},
 	},
 ]);

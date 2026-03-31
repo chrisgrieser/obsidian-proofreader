@@ -8,11 +8,13 @@ const reasoningEffortOptions = ["minimal", "low", "medium", "high"] as const;
 type ReasoningEffort = (typeof reasoningEffortOptions)[number];
 
 export const DEFAULT_SETTINGS = {
-	openAiApiKey: "",
-	geminiApiKey: "",
 	model: "gpt-5-nano" as ModelName,
+
+	openAiApiKey: "",
 	reasoningEffort: "minimal" as ReasoningEffort,
 	openAiEndpoint: "",
+
+	geminiApiKey: "",
 
 	preserveItalicAndBold: false,
 	preserveTextInsideQuotes: false,
@@ -122,7 +124,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("AIza…")
 					.setValue(settings.geminiApiKey)
 					.onChange(async (value) => {
