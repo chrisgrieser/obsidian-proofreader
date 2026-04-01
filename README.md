@@ -13,19 +13,17 @@ feature in word processing apps.
 
 <!-- toc -->
 
-- [Proofreader for Obsidian](#proofreader-for-obsidian)
-  - [Table of contents](#table-of-contents)
-  - [Features](#features)
-  - [Installation \& setup](#installation--setup)
+- [Features](#features)
+- [Installation & setup](#installation--setup)
     - [Plugin installation](#plugin-installation)
     - [Get an API key](#get-an-api-key)
-  - [Usage](#usage)
-  - [Visual appearance of the changes](#visual-appearance-of-the-changes)
-  - [Testimonials](#testimonials)
-  - [Plugin development](#plugin-development)
+- [Usage](#usage)
+- [Visual appearance of the changes](#visual-appearance-of-the-changes)
+- [Testimonials](#testimonials)
+- [Plugin development](#plugin-development)
     - [General](#general)
     - [Adding support for new LLMs](#adding-support-for-new-llms)
-  - [About the developer](#about-the-developer)
+- [About the developer](#about-the-developer)
 
 <!-- tocstop -->
 
