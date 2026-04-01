@@ -4,12 +4,12 @@ import { MODEL_SPECS } from "src/providers/model-info";
 import { logError } from "src/utils";
 
 export const googleRequest: ProviderAdapter = async (settings, oldText) => {
-	if (!settings.geminiApiKey) {
+	if (!settings.googleApiKey) {
 		new Notice("Please set your Google API key in the plugin settings.");
 		return;
 	}
 
-	const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.geminiApiKey}`;
+	const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.googleApiKey}`;
 
 	let response: RequestUrlResponse;
 	try {

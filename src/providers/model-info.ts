@@ -1,10 +1,14 @@
 import type { ProviderAdapter, ProviderName } from "src/providers/adapter";
 import { googleRequest } from "src/providers/google";
+import { mistralRequest } from "src/providers/mistral";
 import { openAiRequest } from "src/providers/openai";
+import { openRouterRequest } from "src/providers/openrouter";
 
 export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
 	openai: openAiRequest,
 	google: googleRequest,
+	mistral: mistralRequest,
+	openrouter: openRouterRequest,
 };
 
 export const MODEL_SPECS = {
@@ -50,6 +54,28 @@ export const MODEL_SPECS = {
 			reasoning: 4,
 			speed: 4,
 			url: "https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash",
+		},
+	},
+	"mistral-small-latest": {
+		provider: "mistral",
+		displayText: "Mistral Small",
+		maxOutputTokens: 32_768,
+		info: {
+			costPerMillionTokens: { input: 0.1, output: 0.3 },
+			reasoning: 2,
+			speed: 5,
+			url: "https://docs.mistral.ai/getting-started/models/models_overview/#premier-models",
+		},
+	},
+	openrouter: {
+		provider: "openrouter",
+		displayText: "OpenRouter (custom model)",
+		maxOutputTokens: Number.MAX_SAFE_INTEGER,
+		info: {
+			costPerMillionTokens: { input: 0, output: 0 },
+			reasoning: 0,
+			speed: 0,
+			url: "https://openrouter.ai/models",
 		},
 	},
 } as const; // `as const` needed for type inference

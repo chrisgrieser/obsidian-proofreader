@@ -14,7 +14,12 @@ export const DEFAULT_SETTINGS = {
 	reasoningEffort: "minimal" as ReasoningEffort,
 	openAiEndpoint: "",
 
-	geminiApiKey: "",
+	googleApiKey: "",
+
+	mistralApiKey: "",
+
+	openRouterApiKey: "",
+	openRouterModel: "",
 
 	preserveItalicAndBold: false,
 	preserveTextInsideQuotes: false,
@@ -124,10 +129,70 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("AIza…")
-					.setValue(settings.geminiApiKey)
+					.setValue(settings.googleApiKey)
 					.onChange(async (value) => {
-						settings.geminiApiKey = value.trim();
+						settings.googleApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		//────────────────────────────────────────────────────────────────────────
+		// Mistral settings
+		new Setting(containerEl).setName("Mistral").setHeading();
+
+		new Setting(containerEl)
+			.setName("API key")
+			.setDesc("Get your API key from https://console.mistral.ai/api-keys")
+			.addText((input) => {
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
+					.setPlaceholder("…")
+					.setValue(settings.mistralApiKey)
+					.onChange(async (value) => {
+						settings.mistralApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		//────────────────────────────────────────────────────────────────────────
+		// OpenRouter settings
+		new Setting(containerEl).setName("OpenRouter").setHeading();
+
+		new Setting(containerEl)
+			.setName("API key")
+			.setDesc("Get your API key from https://openrouter.ai/settings/keys")
+			.addText((input) => {
+				input.inputEl.type = "password"; // obfuscates the field
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
+					.setPlaceholder("sk-or-…")
+					.setValue(settings.openRouterApiKey)
+					.onChange(async (value) => {
+						settings.openRouterApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl)
+			.setName("Model")
+			.setDesc(
+				"Any model ID from https://openrouter.ai/models " +
+					"(e.g. anthropic/claude-3.5-haiku). " +
+					'Select "OpenRouter (custom model)" in the model dropdown above to use this.',
+			)
+			.addText((input) => {
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
+					.setPlaceholder("provider/model-name")
+					.setValue(settings.openRouterModel)
+					.onChange(async (value) => {
+						settings.openRouterModel = value.trim();
 						await this.plugin.saveSettings();
 					});
 			});
