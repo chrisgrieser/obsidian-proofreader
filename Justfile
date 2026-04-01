@@ -1,6 +1,6 @@
 set quiet := true
 
-test_vault := "$HOME/writing-vault"
+test_vault := "/Users/giacomolisita/Projects/giacolees.github.io"
 
 #───────────────────────────────────────────────────────────────────────────────
 

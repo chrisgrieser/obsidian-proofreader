@@ -13,17 +13,19 @@ feature in word processing apps.
 
 <!-- toc -->
 
-- [Features](#features)
-- [Installation & setup](#installation--setup)
+- [Proofreader for Obsidian](#proofreader-for-obsidian)
+  - [Table of contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation \& setup](#installation--setup)
     - [Plugin installation](#plugin-installation)
     - [Get an API key](#get-an-api-key)
-- [Usage](#usage)
-- [Visual appearance of the changes](#visual-appearance-of-the-changes)
-- [Testimonials](#testimonials)
-- [Plugin development](#plugin-development)
+  - [Usage](#usage)
+  - [Visual appearance of the changes](#visual-appearance-of-the-changes)
+  - [Testimonials](#testimonials)
+  - [Plugin development](#plugin-development)
     - [General](#general)
     - [Adding support for new LLMs](#adding-support-for-new-llms)
-- [About the developer](#about-the-developer)
+  - [About the developer](#about-the-developer)
 
 <!-- tocstop -->
 
@@ -47,8 +49,9 @@ feature in word processing apps.
     usage costs [on this page](https://platform.openai.com/usage).
 
 > [!NOTE]
-> This plugin requires an **OpenAI or Google API key** and incurs costs based on
-> usage. Network requests are made when running the proofreading command. (PRs
+> This plugin requires an API key from one of the supported providers
+> (OpenAI, Google, Mistral, or OpenRouter) and incurs costs based on usage.
+> Network requests are made when running the proofreading command. (PRs
 > [adding support for other LLMs](#adding-support-for-new-llms) are welcome.)
 
 ## Installation & setup
@@ -78,6 +81,22 @@ feature in word processing apps.
 3. Copy the API key.
 4. In Obsidian, go to `Settings → Proofreader → Google` and paste your
    API key there.
+
+**Mistral**
+1. [Create a Mistral account](https://console.mistral.ai/).
+2. Go to [API keys](https://console.mistral.ai/api-keys) and click
+   `Create new key`.
+3. Copy the API key.
+4. In Obsidian, go to `Settings → Proofreader → Mistral` and paste your
+   API key there.
+
+**OpenRouter**
+1. [Create an OpenRouter account](https://openrouter.ai/).
+2. Go to [API keys](https://openrouter.ai/settings/keys) and click
+   `Create key`.
+3. Copy the API key.
+4. In Obsidian, go to `Settings → Proofreader → OpenRouter` and paste
+   your API key there.
 
 ## Usage
 1. Use the command `Proofread selection/paragraph` to check the selected
