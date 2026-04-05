@@ -14,7 +14,7 @@ export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
 export const MODEL_SPECS = {
 	"gpt-5-nano": {
 		provider: "openai",
-		displayText: "GPT 5 nano",
+		displayText: "GPT 5 nano (OpenAI)",
 		maxOutputTokens: 128_000,
 		info: {
 			costPerMillionTokens: { input: 0.05, output: 0.4 },
@@ -25,7 +25,7 @@ export const MODEL_SPECS = {
 	},
 	"gpt-5-mini": {
 		provider: "openai",
-		displayText: "GPT 5 mini",
+		displayText: "GPT 5 mini (OpenAI)",
 		maxOutputTokens: 128_000,
 		info: {
 			costPerMillionTokens: { input: 0.25, output: 2.0 },
@@ -36,7 +36,7 @@ export const MODEL_SPECS = {
 	},
 	"gemini-2.5-flash-lite": {
 		provider: "google",
-		displayText: "Gemini 2.5 Flash Lite",
+		displayText: "Gemini 2.5 Flash Lite (Google)",
 		maxOutputTokens: 65_536,
 		info: {
 			costPerMillionTokens: { input: 0.1, output: 0.4 },
@@ -47,7 +47,7 @@ export const MODEL_SPECS = {
 	},
 	"gemini-2.5-flash": {
 		provider: "google",
-		displayText: "Gemini 2.5 Flash",
+		displayText: "Gemini 2.5 Flash (Google)",
 		maxOutputTokens: 65_536,
 		info: {
 			costPerMillionTokens: { input: 0.3, output: 2.5 },
@@ -58,7 +58,7 @@ export const MODEL_SPECS = {
 	},
 	"mistral-small-latest": {
 		provider: "mistral",
-		displayText: "Mistral Small",
+		displayText: "Mistral Small Latest (Mistral)",
 		maxOutputTokens: 32_768,
 		info: {
 			costPerMillionTokens: { input: 0.1, output: 0.3 },
@@ -69,7 +69,7 @@ export const MODEL_SPECS = {
 	},
 	openrouter: {
 		provider: "openrouter",
-		displayText: "OpenRouter (custom model)",
+		displayText: "OpenRouter [custom model]",
 		maxOutputTokens: Number.MAX_SAFE_INTEGER,
 		info: {
 			costPerMillionTokens: { input: 0, output: 0 },
