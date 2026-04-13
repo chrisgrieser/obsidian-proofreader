@@ -13,7 +13,7 @@ export const openAiRequest: ProviderAdapter = async (settings, oldText) => {
 
 	let response: RequestUrlResponse;
 	try {
-		// DOCS https://platform.openai.com/docs/api-reference/responses/create
+		// DOCS https://developers.openai.com/api/reference/resources/responses/methods/create
 		response = await requestUrl({
 			url: endpoint,
 			method: "POST",

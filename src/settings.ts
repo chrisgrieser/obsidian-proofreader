@@ -3,15 +3,15 @@ import type Proofreader from "src/main";
 import type { ModelName } from "src/providers/adapter";
 import { MODEL_SPECS } from "src/providers/model-info";
 
-// https://platform.openai.com/docs/api-reference/responses/object#responses/object-reasoning
-const reasoningEffortOptions = ["minimal", "low", "medium", "high"] as const;
+// https://developers.openai.com/api/reference/resources/responses/methods/create
+const reasoningEffortOptions = ["none", "low", "medium", "high"] as const;
 type ReasoningEffort = (typeof reasoningEffortOptions)[number];
 
 export const DEFAULT_SETTINGS = {
-	model: "gpt-5-nano" as ModelName,
+	model: "gpt-5.4-nano" as ModelName,
 
 	openAiApiKey: "",
-	reasoningEffort: "minimal" as ReasoningEffort,
+	reasoningEffort: "low" as ReasoningEffort,
 	openAiEndpoint: "",
 
 	googleApiKey: "",
@@ -27,8 +27,15 @@ export const DEFAULT_SETTINGS = {
 	preserveNonSmartPuncation: false,
 	diffWithSpace: false,
 
-	staticPrompt:
-		"Act as a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. Preserve the original meaning and any technical jargon. Suggest structural changes only if they significantly improve flow or understanding. Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. Output only the revised text and nothing else. The text may contain Markdown formatting, which should be preserved when appropriate. The text is:",
+	staticPrompt: `You are a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. While doing so, adhere to the following:
+- Preserve the original meaning and any technical jargon. 
+- Suggest structural changes only if they significantly improve flow or understanding. 
+- Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). 
+- Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. 
+- Output only the revised text and nothing else.
+- The text may contain Markdown formatting, which should be preserved when appropriate. 
+The text is:
+`,
 };
 
 export type ProofreaderSettings = typeof DEFAULT_SETTINGS;
@@ -50,8 +57,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		containerEl.empty();
 
-		//────────────────────────────────────────────────────────────────────────
-		// Model selection
+		// MODEL SELECTION
 		new Setting(containerEl)
 			.setName("Model")
 			.setDesc("Select the AI model to use for proofreading.")
@@ -66,8 +72,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				});
 			});
 
-		//────────────────────────────────────────────────────────────────────────
-		// OpenAI settings
+		// OPENAI SETTINGS
 		new Setting(containerEl).setName("OpenAI").setHeading();
 
 		new Setting(containerEl)
@@ -118,8 +123,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					});
 			});
 
-		//────────────────────────────────────────────────────────────────────────
-		// Google settings
+		// GOOGLE SETTINGS
 		new Setting(containerEl).setName("Google").setHeading();
 
 		new Setting(containerEl)
@@ -129,7 +133,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("AIza…")
 					.setValue(settings.googleApiKey)
 					.onChange(async (value) => {
@@ -138,8 +141,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					});
 			});
 
-		//────────────────────────────────────────────────────────────────────────
-		// Mistral settings
+		// MISTRAL SETTINGS
 		new Setting(containerEl).setName("Mistral").setHeading();
 
 		new Setting(containerEl)
@@ -149,7 +151,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 					.setPlaceholder("…")
 					.setValue(settings.mistralApiKey)
 					.onChange(async (value) => {
@@ -158,8 +159,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					});
 			});
 
-		//────────────────────────────────────────────────────────────────────────
-		// OpenRouter settings
+		// OPENROUTER SETTINGS
 		new Setting(containerEl).setName("OpenRouter").setHeading();
 
 		new Setting(containerEl)
@@ -197,7 +197,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					});
 			});
 
-		//────────────────────────────────────────────────────────────────────────
 		// DIFF OPTIONS
 		new Setting(containerEl).setName("Diff").setHeading();
 
@@ -264,7 +263,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				}),
 			);
 
-		//────────────────────────────────────────────────────────────────────────
 		// ADVANCED
 		new Setting(containerEl).setName("Advanced").setHeading();
 

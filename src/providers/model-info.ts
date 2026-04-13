@@ -12,26 +12,26 @@ export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
 };
 
 export const MODEL_SPECS = {
-	"gpt-5-nano": {
+	"gpt-5.4-nano": {
 		provider: "openai",
-		displayText: "GPT 5 nano (OpenAI)",
+		displayText: "GPT 5.4 nano (OpenAI)",
 		maxOutputTokens: 128_000,
 		info: {
-			costPerMillionTokens: { input: 0.05, output: 0.4 },
-			reasoning: 2,
-			speed: 5,
-			url: "https://platform.openai.com/docs/models/gpt-5-nano",
-		},
-	},
-	"gpt-5-mini": {
-		provider: "openai",
-		displayText: "GPT 5 mini (OpenAI)",
-		maxOutputTokens: 128_000,
-		info: {
-			costPerMillionTokens: { input: 0.25, output: 2.0 },
+			costPerMillionTokens: { input: 0.2, output: 1.25 },
 			reasoning: 3,
 			speed: 4,
-			url: "https://platform.openai.com/docs/models/gpt-5-nano",
+			url: "https://developers.openai.com/api/docs/models/gpt-5.4-nano",
+		},
+	},
+	"gpt-5.4-mini": {
+		provider: "openai",
+		displayText: "GPT 5.4 mini (OpenAI)",
+		maxOutputTokens: 128_000,
+		info: {
+			costPerMillionTokens: { input: 0.75, output: 4.5 },
+			reasoning: 4,
+			speed: 4,
+			url: "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
 		},
 	},
 	"gemini-2.5-flash-lite": {
