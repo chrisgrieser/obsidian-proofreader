@@ -19,6 +19,8 @@ export const ollamaRequest: ProviderAdapter = async (settings, oldText) => {
 			contentType: "application/json",
 			body: JSON.stringify({
 				model: settings.ollamaModel,
+				// biome-ignore lint/style/useNamingConvention: API field name
+				reasoning_effort: settings.ollamaReasoningEffort,
 				messages: [
 					{ role: "system", content: settings.staticPrompt },
 					{ role: "user", content: oldText },
