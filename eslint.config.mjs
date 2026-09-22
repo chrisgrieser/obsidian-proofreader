@@ -47,7 +47,7 @@ export default defineConfig([
 			// PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
 			"obsidianmd/ui/sentence-case": [
 				"warn",
-				{ brands: ["OpenAI", "Google", "Mistral", "OpenRouter"] },
+				{ brands: ["OpenAI", "Google", "Mistral", "OpenRouter", "Ollama"] },
 			],
 		},
 	},

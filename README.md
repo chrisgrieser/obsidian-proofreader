@@ -49,8 +49,10 @@ feature in word processing apps.
 > [!NOTE]
 > This plugin requires an API key from one of the supported providers
 > (OpenAI, Google, Mistral, or OpenRouter) and incurs costs based on usage.
-> Network requests are made when running the proofreading command. (PRs
-> [adding support for other LLMs](#adding-support-for-new-llms) are welcome.)
+> Alternatively, you can use a local model via [Ollama](https://ollama.com),
+> which requires no API key. Network requests are made when running the
+> proofreading command. (PRs [adding support for other
+> LLMs](#adding-support-for-new-llms) are welcome.)
 
 ## Installation & setup
 
@@ -95,6 +97,15 @@ feature in word processing apps.
 3. Copy the API key.
 4. In Obsidian, go to `Settings → Proofreader → OpenRouter` and paste
    your API key there.
+
+**Ollama (local)**
+1. [Install Ollama](https://ollama.com/download) and make sure it is
+   running.
+2. Download a model, for instance with `ollama pull gemma3`.
+3. In Obsidian, go to `Settings → Proofreader → Ollama` and enter the
+   model name (e.g. `gemma3`).
+4. Select `Ollama [custom model]` in the model dropdown at the top of
+   the settings.
 
 ## Usage
 1. Use the command `Proofread selection/paragraph` to check the selected

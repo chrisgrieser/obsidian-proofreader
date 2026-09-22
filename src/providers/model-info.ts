@@ -1,6 +1,7 @@
 import type { ProviderAdapter, ProviderName } from "src/providers/adapter";
 import { googleRequest } from "src/providers/google";
 import { mistralRequest } from "src/providers/mistral";
+import { ollamaRequest } from "src/providers/ollama";
 import { openAiRequest } from "src/providers/openai";
 import { openRouterRequest } from "src/providers/openrouter";
 
@@ -9,6 +10,7 @@ export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
 	google: googleRequest,
 	mistral: mistralRequest,
 	openrouter: openRouterRequest,
+	ollama: ollamaRequest,
 };
 
 export const MODEL_SPECS = {
@@ -76,6 +78,17 @@ export const MODEL_SPECS = {
 			reasoning: 0,
 			speed: 0,
 			url: "https://openrouter.ai/models",
+		},
+	},
+	ollama: {
+		provider: "ollama",
+		displayText: "Ollama [custom model]",
+		maxOutputTokens: Number.MAX_SAFE_INTEGER,
+		info: {
+			costPerMillionTokens: { input: 0, output: 0 },
+			reasoning: 0,
+			speed: 0,
+			url: "https://ollama.com/library",
 		},
 	},
 } as const; // `as const` needed for type inference
