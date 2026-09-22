@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS = {
 
 	ollamaEndpoint: "http://localhost:11434",
 	ollamaModel: "",
+	ollamaReasoningEffort: "none" as ReasoningEffort,
 
 	preserveItalicAndBold: false,
 	preserveTextInsideQuotes: false,
@@ -219,6 +220,23 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 						settings.ollamaModel = value.trim();
 						await this.plugin.saveSettings();
 					});
+			});
+
+		new Setting(containerEl)
+			.setName("Reasoning effort")
+			.setDesc(
+				"Higher uses more tokens and is slower, but produces better results. " +
+					'"none" disables the thinking mode of reasoning models, which is faster and usually sufficient for proofreading. ' +
+					"Models without a thinking mode ignore this setting.",
+			)
+			.addDropdown((dropdown) => {
+				for (const option of reasoningEffortOptions) {
+					dropdown.addOption(option, option);
+				}
+				dropdown.setValue(settings.ollamaReasoningEffort).onChange(async (value) => {
+					settings.ollamaReasoningEffort = value as ReasoningEffort;
+					await this.plugin.saveSettings();
+				});
 			});
 
 		new Setting(containerEl)
