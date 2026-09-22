@@ -21,6 +21,9 @@ export const DEFAULT_SETTINGS = {
 	openRouterApiKey: "",
 	openRouterModel: "",
 
+	ollamaEndpoint: "http://localhost:11434",
+	ollamaModel: "",
+
 	preserveItalicAndBold: false,
 	preserveTextInsideQuotes: false,
 	preserveBlockquotes: false,
@@ -193,6 +196,44 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					.setValue(settings.openRouterModel)
 					.onChange(async (value) => {
 						settings.openRouterModel = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		// OLLAMA SETTINGS
+		new Setting(containerEl).setName("Ollama").setHeading();
+
+		new Setting(containerEl)
+			.setName("Model")
+			.setDesc(
+				"Name of the local model from https://ollama.com/library " +
+					"(e.g. llama3.2). " +
+					'Select "Ollama [custom model]" in the model dropdown above to use this.',
+			)
+			.addText((input) => {
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("llama3.2")
+					.setValue(settings.ollamaModel)
+					.onChange(async (value) => {
+						settings.ollamaModel = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl)
+			.setName("Advanced: URL endpoint")
+			.setDesc(
+				"Base URL of the Ollama server. " +
+					"Most users do not need to change this setting, only change this if you know what you are doing. ",
+			)
+			.addText((input) => {
+				input.inputEl.setCssProps({ width: "100%" });
+				input
+					.setPlaceholder("http://localhost:11434")
+					.setValue(settings.ollamaEndpoint)
+					.onChange(async (value) => {
+						settings.ollamaEndpoint = value.trim();
 						await this.plugin.saveSettings();
 					});
 			});
