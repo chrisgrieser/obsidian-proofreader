@@ -48,12 +48,6 @@ export default class Proofreader extends Plugin {
 			editorCallback: (editor): void => acceptOrRejectNextSuggestion(editor, "reject"),
 			icon: "x",
 		});
-
-		console.info(this.manifest.name + " Plugin loaded.");
-	}
-
-	override onunload(): void {
-		console.info(this.manifest.name + " Plugin unloaded.");
 	}
 
 	async saveSettings(): Promise<void> {
