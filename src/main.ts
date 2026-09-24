@@ -4,7 +4,7 @@ import { proofreadDocument, proofreadText } from "src/proofread";
 import { DEFAULT_SETTINGS, type ProofreaderSettings, ProofreaderSettingsMenu } from "src/settings";
 
 export default class Proofreader extends Plugin {
-	settings: ProofreaderSettings = DEFAULT_SETTINGS;
+	override settings: ProofreaderSettings = DEFAULT_SETTINGS;
 
 	override async onload(): Promise<void> {
 		// settings

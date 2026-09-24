@@ -55,7 +55,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
+	override display(): void {
 		const { containerEl } = this;
 		const settings = this.plugin.settings;
 
@@ -81,13 +81,12 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API key")
-			.setDesc("Get your API key from https://platform.openai.com/api-keys")
+			.setDesc("Get your API key from <https://platform.openai.com/api-keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
-					.setPlaceholder("sk-123456789…")
+					.setPlaceholder("Sk-123456789")
 					.setValue(settings.openAiApiKey)
 					.onChange(async (value) => {
 						settings.openAiApiKey = value.trim();
@@ -118,8 +117,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.addText((input) => {
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
-					.setPlaceholder("https://...")
+					.setPlaceholder("URL")
 					.setValue(settings.openAiEndpoint)
 					.onChange(async (value) => {
 						settings.openAiEndpoint = value.trim();
@@ -132,7 +130,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API key")
-			.setDesc("Get your API key from https://aistudio.google.com/app/apikey")
+			.setDesc("Get your API key from <https://aistudio.google.com/app/apikey>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
@@ -150,7 +148,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API key")
-			.setDesc("Get your API key from https://console.mistral.ai/api-keys")
+			.setDesc("Get your API key from <https://console.mistral.ai/api-keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
@@ -168,13 +166,12 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API key")
-			.setDesc("Get your API key from https://openrouter.ai/settings/keys")
+			.setDesc("Get your API key from <https://openrouter.ai/settings/keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
-					.setPlaceholder("sk-or-…")
+					.setPlaceholder("Sk-123456789 or other")
 					.setValue(settings.openRouterApiKey)
 					.onChange(async (value) => {
 						settings.openRouterApiKey = value.trim();
@@ -192,8 +189,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.addText((input) => {
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- PENDING https://github.com/obsidianmd/eslint-plugin/issues/71
-					.setPlaceholder("provider/model-name")
+					.setPlaceholder("Provider/model-name")
 					.setValue(settings.openRouterModel)
 					.onChange(async (value) => {
 						settings.openRouterModel = value.trim();
@@ -248,7 +244,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.addText((input) => {
 				input.inputEl.setCssProps({ width: "100%" });
 				input
-					.setPlaceholder("http://localhost:11434")
+					.setPlaceholder("Example: http://localhost:11434")
 					.setValue(settings.ollamaEndpoint)
 					.onChange(async (value) => {
 						settings.ollamaEndpoint = value.trim();
