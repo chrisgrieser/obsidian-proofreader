@@ -2,7 +2,7 @@ import { type Change, diffWords, diffWordsWithSpace } from "diff";
 import { type Editor, getFrontMatterInfo, Notice } from "obsidian";
 import { rejectChanges } from "src/accept-reject-suggestions";
 import type Proofreader from "src/main";
-import type { ModelName, ProviderAdapter } from "src/providers/adapter";
+import type { ProviderAdapter } from "src/providers/adapter";
 import { MODEL_SPECS, PROVIDER_REQUEST_MAP } from "src/providers/model-info";
 import type { ProofreaderSettings } from "src/settings";
 
@@ -105,7 +105,7 @@ async function validateAndGetChangesAndNotify(
 	const { app, settings } = plugin;
 
 	// GUARD outdated model
-	const model = MODEL_SPECS[settings.model as ModelName];
+	const model = MODEL_SPECS[settings.model];
 	if (!model) {
 		const errmsg = `! The model "${settings.model}" is outdated. Please select a more recent one in the settings.`;
 		new Notice(errmsg, 10_000);

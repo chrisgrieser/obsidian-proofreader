@@ -55,6 +55,8 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	// TODO Migrate to more modern Obsidian setting once more users adopted 1.13
+	// https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
 	override display(): void {
 		const { containerEl } = this;
 		const settings = this.plugin.settings;
