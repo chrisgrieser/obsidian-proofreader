@@ -1,4 +1,15 @@
 export const MODEL_SPECS = {
+	"gpt-6-luna": {
+		provider: "openai",
+		displayText: "GPT 6 Luna (OpenAI)",
+		maxOutputTokens: 128_000,
+		info: {
+			costPerMillionTokens: { input: 0.1, output: 0.5 },
+			reasoning: 3,
+			speed: 4,
+			url: "https://developers.openai.com/api/docs/models/gpt-6-luna",
+		},
+	},
 	"gpt-5.4-nano": {
 		provider: "openai",
 		displayText: "GPT 5.4 nano (OpenAI)",

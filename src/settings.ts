@@ -8,7 +8,7 @@ const reasoningEffortOptions = ["none", "low", "medium", "high"] as const;
 type ReasoningEffort = (typeof reasoningEffortOptions)[number];
 
 export const DEFAULT_SETTINGS = {
-	model: "gpt-5.4-nano" as ModelName,
+	model: "gpt-6-luna" as ModelName,
 
 	openAiApiKey: "",
 	reasoningEffort: "low" as ReasoningEffort,
