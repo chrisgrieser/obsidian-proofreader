@@ -10,13 +10,16 @@ feature in word processing apps.
 <img alt="Showcase" width=70% src="https://github.com/user-attachments/assets/fa77eb97-61b9-4102-b8b2-e7c385868363">
 
 ## Table of contents
-
 <!-- toc -->
-
 - [Features](#features)
 - [Installation & setup](#installation--setup)
     - [Plugin installation](#plugin-installation)
     - [Get an API key](#get-an-api-key)
+        - [OpenAI](#openai)
+        - [Google](#google)
+        - [Mistral](#mistral)
+        - [OpenRouter](#openrouter)
+        - [Ollama (local)](#ollama-local)
 - [Usage](#usage)
 - [Visual appearance of the changes](#visual-appearance-of-the-changes)
 - [Testimonials](#testimonials)
@@ -24,7 +27,6 @@ feature in word processing apps.
     - [General](#general)
     - [Adding support for new LLMs](#adding-support-for-new-llms)
 - [About the developer](#about-the-developer)
-
 <!-- tocstop -->
 
 ## Features
@@ -41,10 +43,11 @@ feature in word processing apps.
 | Method of incorporating changes       | mostly mouse clicks                             | keyboard shortcuts                                                           |
 | Additional benefits                   | Editor makes general comments on writing style. | Plugin can also be used to quickly proofread single sentences or paragraphs. |
 
-[^1]: Estimated pricing for the [GPT 4.1 nano
-    model](https://platform.openai.com/docs/models/) in April 2025. The plugin
-    developer is not responsible if the actual costs differ. You can track your
-    usage costs [on this page](https://platform.openai.com/usage).
+[^1]: Estimated pricing for the
+    [GPT 4.1 nano model](https://platform.openai.com/docs/models/) in April
+    2025. The plugin
+developer is not responsible if the actual costs differ. You can track your
+usage costs [on this page](https://platform.openai.com/usage).
 
 > [!NOTE]
 > This plugin requires an API key from one of the supported providers
@@ -61,7 +64,7 @@ feature in word processing apps.
 
 ### Get an API key
 
-**OpenAI**
+#### OpenAI
 1. [Create an OpenAI account](https://auth.openai.com/create-account).
 2. Go to [this site](https://platform.openai.com/api-keys), and click `Create
    new secret key`.
@@ -73,7 +76,7 @@ feature in word processing apps.
 > The usage costs should not be very high, nonetheless you can track them
 > [on this page](https://platform.openai.com/usage).
 
-**Google**
+#### Google
 1. [Create a Google account](https://accounts.google.com/signup) if you
    don't have one.
 2. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and
@@ -82,7 +85,7 @@ feature in word processing apps.
 4. In Obsidian, go to `Settings → Proofreader → Google` and paste your
    API key there.
 
-**Mistral**
+#### Mistral
 1. [Create a Mistral account](https://console.mistral.ai/).
 2. Go to [API keys](https://console.mistral.ai/api-keys) and click
    `Create new key`.
@@ -90,7 +93,7 @@ feature in word processing apps.
 4. In Obsidian, go to `Settings → Proofreader → Mistral` and paste your
    API key there.
 
-**OpenRouter**
+#### OpenRouter
 1. [Create an OpenRouter account](https://openrouter.ai/).
 2. Go to [API keys](https://openrouter.ai/settings/keys) and click
    `Create key`.
@@ -98,12 +101,12 @@ feature in word processing apps.
 4. In Obsidian, go to `Settings → Proofreader → OpenRouter` and paste
    your API key there.
 
-**Ollama (local)**
+#### Ollama (local)
 1. [Install Ollama](https://ollama.com/download) and make sure it is
    running.
 2. Download a model, for instance with `ollama pull gemma3`.
 3. In Obsidian, go to `Settings → Proofreader → Ollama` and enter the
-   model name (e.g. `gemma3`).
+   model name (e.g., `gemma3`).
 4. Select `Ollama [custom model]` in the model dropdown at the top of
    the settings.
 
@@ -123,16 +126,16 @@ feature in word processing apps.
 
 ## Visual appearance of the changes
 You can add the following CSS snippet to make highlights and strikethroughs
-appear like suggested changes, similar to the screenshot further above.
+appear as suggested changes, similar to the screenshot further above.
 ([Manual: How to add CSS snippets.](https://help.obsidian.md/snippets))
 
 ```css
 .cm-strikethrough {
-	text-decoration-color: var(--color-red);
+    text-decoration-color: var(--color-red);
 }
 
 .cm-s-obsidian span.cm-highlight {
-	background-color: rgba(var(--color-green-rgb), 35%);
+    background-color: rgba(var(--color-green-rgb), 35%);
 }
 ```
 
