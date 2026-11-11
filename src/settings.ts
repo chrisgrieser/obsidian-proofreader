@@ -86,7 +86,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setDesc("Get your API key from <https://platform.openai.com/api-keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("Sk-123456789")
 					.setValue(settings.openAiApiKey)
@@ -117,7 +116,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
 			.addText((input) => {
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("URL")
 					.setValue(settings.openAiEndpoint)
@@ -135,7 +133,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setDesc("Get your API key from <https://aistudio.google.com/app/apikey>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("AIza…")
 					.setValue(settings.googleApiKey)
@@ -153,7 +150,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setDesc("Get your API key from <https://console.mistral.ai/api-keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("…")
 					.setValue(settings.mistralApiKey)
@@ -171,7 +167,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 			.setDesc("Get your API key from <https://openrouter.ai/settings/keys>")
 			.addText((input) => {
 				input.inputEl.type = "password"; // obfuscates the field
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("Sk-123456789 or other")
 					.setValue(settings.openRouterApiKey)
@@ -189,7 +184,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					'Select "OpenRouter (custom model)" in the model dropdown above to use this.',
 			)
 			.addText((input) => {
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("Provider/model-name")
 					.setValue(settings.openRouterModel)
@@ -210,7 +204,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					'Select "Ollama [custom model]" in the model dropdown above to use this.',
 			)
 			.addText((input) => {
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("llama3.2")
 					.setValue(settings.ollamaModel)
@@ -244,7 +237,6 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
 			.addText((input) => {
-				input.inputEl.setCssProps({ width: "100%" });
 				input
 					.setPlaceholder("Example: http://localhost:11434")
 					.setValue(settings.ollamaEndpoint)
@@ -329,8 +321,8 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 				"The LLM must respond ONLY with the updated text for this plugin to work. Leave the text field empty to reset to the default prompt. " +
 					"Most users do not need to change this setting, only change this if you know what you are doing. ",
 			)
+			.setClass("proofreader larger-textarea")
 			.addTextArea((textarea) => {
-				textarea.inputEl.setCssProps({ width: "25vw", height: "15em" });
 				textarea
 					.setValue(settings.staticPrompt)
 					.setPlaceholder("Make suggestions based on…")
