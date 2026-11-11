@@ -1,18 +1,3 @@
-import type { ProviderAdapter, ProviderName } from "src/providers/adapter";
-import { googleRequest } from "src/providers/google";
-import { mistralRequest } from "src/providers/mistral";
-import { ollamaRequest } from "src/providers/ollama";
-import { openAiRequest } from "src/providers/openai";
-import { openRouterRequest } from "src/providers/openrouter";
-
-export const PROVIDER_REQUEST_MAP: Record<ProviderName, ProviderAdapter> = {
-	openai: openAiRequest,
-	google: googleRequest,
-	mistral: mistralRequest,
-	openrouter: openRouterRequest,
-	ollama: ollamaRequest,
-};
-
 export const MODEL_SPECS = {
 	"gpt-5.4-nano": {
 		provider: "openai",

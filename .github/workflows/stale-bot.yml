@@ -1,7 +1,7 @@
 name: Stale bot
 on:
   schedule:
-    - cron: "18 04 * * 3" 
+    - cron: "18 04 * * 3"
 
 permissions:
   issues: write

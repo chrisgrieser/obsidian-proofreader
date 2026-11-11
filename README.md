@@ -164,12 +164,15 @@ just check  # runs the pre-commit hook (without committing)
 
 ### Adding support for new LLMs
 1. Create a new adapter for the LLM in
-   [./src/providers/](./src/providers/). This should take ~50 lines of code.
-2. In [./src/providers/model-info.ts](./src/providers/model-info.ts), add the
-   adapter function to `PROVIDER_REQUEST_MAP`, and add models for the new
-   provider to `MODEL_SPECS`.
-3. In [./src/settings.ts](./src/settings.ts), add a setting for the API key to
-   `ProofreaderSettingsMenu` and add a field to `DEFAULT_SETTINGS`.
+   [./src/providers/request-logic/](./src/providers/request-logic/). This should
+   take ~50 lines of code.
+2. In
+   [./src/providers/provider-request-map.tts](./src/providers/provider-request-map.ts),
+   add the adapter function to `PROVIDER_REQUEST_MAP`.
+3. In [./src/providers/model-info.ts](./src/providers/model-info.ts)
+   add models for the new provider to `MODEL_SPECS`.
+4. Finally, in [./src/settings.ts](./src/settings.ts), add a setting for the API
+   key to `ProofreaderSettingsMenu` and add a field to `DEFAULT_SETTINGS`.
 
 ## About the developer
 In my day job, I am a sociologist studying the social mechanisms underlying the

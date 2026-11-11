@@ -3,7 +3,8 @@ import { type Editor, getFrontMatterInfo, Notice } from "obsidian";
 import { rejectChanges } from "src/accept-reject-suggestions";
 import type Proofreader from "src/main";
 import type { ProviderAdapter } from "src/providers/adapter";
-import { MODEL_SPECS, PROVIDER_REQUEST_MAP } from "src/providers/model-info";
+import { MODEL_SPECS } from "src/providers/model-info";
+import { PROVIDER_REQUEST_MAP } from "src/providers/provider-request-map";
 import type { ProofreaderSettings } from "src/settings";
 
 function getDiffMarkdown(

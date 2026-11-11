@@ -1,7 +1,6 @@
 // DOCS https://github.com/obsidianmd/eslint-plugin#usage
 //──────────────────────────────────────────────────────────────────────────────
-
-import tsparser from "@typescript-eslint/parser";
+import * as tsparser from "@typescript-eslint/parser";
 import { defineConfig } from "eslint/config";
 import obsidianmd from "eslint-plugin-obsidianmd";
 
