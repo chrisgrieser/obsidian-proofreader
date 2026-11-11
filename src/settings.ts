@@ -32,12 +32,12 @@ export const DEFAULT_SETTINGS = {
 	diffWithSpace: false,
 
 	staticPrompt: `You are a professional editor. Please make suggestions how to improve clarity, readability, grammar, and language of the following text. While doing so, adhere to the following:
-- Preserve the original meaning and any technical jargon. 
-- Suggest structural changes only if they significantly improve flow or understanding. 
-- Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists). 
-- Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise. 
+- Preserve the original meaning and any technical jargon.
+- Suggest structural changes only if they significantly improve flow or understanding.
+- Avoid unnecessary expansion or major reformatting (e.g., no unwarranted lists).
+- Try to make as little changes as possible, refrain from doing any changes when the writing is already sufficiently clear and concise.
 - Output only the revised text and nothing else.
-- The text may contain Markdown formatting, which should be preserved when appropriate. 
+- The text may contain Markdown formatting, which should be preserved when appropriate.
 The text is:
 `,
 };
@@ -276,7 +276,7 @@ export class ProofreaderSettingsMenu extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Preserve bold and italic formatting")
 			.setDesc(
-				"Preserve **bold**, and *italic* formatting." +
+				"Preserve **bold**, and *italic* formatting. " +
 					"(This is not flawless, as the AI occasionally rewrite text alongside formatting changes.)",
 			)
 			.addToggle((toggle) =>
